@@ -1,0 +1,19 @@
+%%[
+
+        VAR @accountId, @updateWhatsappConsent, @phoneNumber, @updatePhoneNumber
+
+        SET @accountId = QueryParameter("accountId")
+
+        SET @updateWhatsappConsent = UpdateSingleSalesforceObject(
+                "Account", @accountId, 
+                "WA_DOI__pc", "true"
+                )
+        
+        SET @phoneNumber = RequestParameter("tel")
+                IF NOT EMPTY(@phoneNumber) THEN
+                        SET @updatePhoneNumber = UpdateSingleSalesforceObject(
+                                "Account", @accountId, 
+                                "PersonMobilePhone", @phoneNumber
+                                )
+                ENDIF
+]%%
