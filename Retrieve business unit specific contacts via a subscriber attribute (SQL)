@@ -1,0 +1,12 @@
+SELECT DISTINCT
+    sub.SubscriberKey AS [Subscriber Key],
+    sub.EmailAddress AS [Email Address]
+FROM 
+    ENT._Subscribers sub
+LEFT JOIN 
+    ENT._EnterpriseAttribute ea ON sub.SubscriberID = ea._SubscriberID
+JOIN
+    ENT._Sent s ON sub.SubscriberKey = s.SubscriberKey
+WHERE
+    (Standort IS NULL)
+    AND  s.OYBAccountID = '{{your MID}}'
