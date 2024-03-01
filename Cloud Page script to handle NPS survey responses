@@ -50,7 +50,7 @@
         "Response_ID__c", "MC Response",
         "Response_Status__c", "completed",
         "Vertrag__c", @vertragsid,
-        "BU__c", "SGD"
+        "BU__c", "ACME placeholder"
        )
         /* Stelle den Danketext dar */    
         ]%%
