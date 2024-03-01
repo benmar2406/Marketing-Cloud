@@ -1,0 +1,35 @@
+<script runat="server">
+Platform.Load("Core", "1");
+
+var url = "{{add your Rest API endpoint}}/v2/token";
+var contentType = "application/json";
+var payloadToken = '{"grant_type": "client_credentials","client_id": {{add your client_id}},"client_secret": "{{add your client_secret}}","account_id":{{add your MID}}}';
+
+var accessTokenResult = HTTP.Post(url, contentType, payloadToken);
+var accessToken = Platform.Function.ParseJSON(accessTokenResult["Response"][0]).access_token;
+
+var logDE = DataExtension.Init("{{add name of xour send log DE}}");
+var date = new Date();
+var Id = Platform.Function.GUID();
+
+if (accessToken != "") {
+  try {
+    var deleteUrl = "{{add your Rest API endpoint}}/contacts/v1/contacts/actions/delete?type=listReference";
+    var payloadDeletion = '{"deleteOperationType": "ContactAndAttributes","targetList": {"listType": {"listTypeID": 3},"listKey": "{{add key of your DE containing contacts to delete}}"},"deleteListWhenCompleted": false,"deleteListContentsWhenCompleted": false}';
+    var headerNames = ["Authorization"];
+    var headerValues = ["Bearer " + accessToken];
+    var result = HTTP.Post(deleteUrl, contentType, payloadDeletion, headerNames, headerValues);
+
+    logDE.Rows.Add({ LogID: Id, Level: "debug", Source: "Delete Contacts Automation", Message: "", Data: "", CreatedAt: date });
+
+  } catch (ex) {
+    Write("Exception Error: " + Platform.Function.Stringify(ex));
+
+    logDE.Rows.Add({ LogID: Id, Level: "critical", Source: "Delete Contacts Automation", Message: Platform.Function.Stringify(ex), Data: "", CreatedAt: date });  
+  }
+}  
+
+else {
+  logDE.Rows.Add({ LogID: Id, Level: "critical", Source: "Delete Contacts Automation", Message: "No access token", Data: "", CreatedAt: date });
+}
+</script>
