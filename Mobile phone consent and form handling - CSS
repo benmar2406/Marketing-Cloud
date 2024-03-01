@@ -1,0 +1,130 @@
+<style type="text/css">
+    .content-wrapper {
+        width: 50%;
+        margin: auto;
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    .greeting-message {
+        font-family: Arial, Helvetica, sans-serif;
+        color: #89C82F;
+        font-size: 22px;
+        margin-top: 40px;
+    }
+
+    .button-container {
+        margin: 20px auto; 
+        width: 60%;
+    }
+
+    .confirmation-button {
+        font-size: 16px;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #FFFFFF;
+        text-align: center;
+        text-decoration: none;
+        display: block;
+        background-color: #89C82F;
+        border: 1px solid #89C82F;
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .confirmation-button:hover {
+        font-weight: bold;
+        background-color: #008B35;
+    }
+
+    .phone-confirmation-button {
+        font-size: 16px;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #FFFFFF;
+        text-align: center;
+        text-decoration: none;
+        background-color: #89C82F;
+        border: 1px solid #89C82F;
+        padding: 10px;
+        border-radius: 7px;
+        margin: 10px auto;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .phone-confirmation-button:hover {
+       font-weight: bold;
+       background-color: #008B35;
+    }
+
+    .consent-message {
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 14px;
+    }
+
+    .phone-form {
+        width: 50%;
+        margin: auto;
+        text-align: center;
+        margin-top: 60px;
+    }
+  
+   .input-form {
+       display: flex;
+       flex-direction: column;
+       align-items: center;
+       width: 200px;
+       margin: 40px auto;
+    }
+
+    #tel {
+      border: 3px solid #89C82F;
+      height: 40px;
+      border-radius: 10px;
+      width: 100%;
+      margin: auto;
+      box-sizing: border-box;
+      background-color: #ffff;
+      color: #000000;
+    }
+
+    #tel:hover {
+      background-color: #ffff;
+      color: #000000;
+      cursor: pointer;
+    }
+ 
+    #tel:valid {
+      background-color: #89C82F;
+     color: #ffff;
+    }
+
+
+    @media screen and (max-width: 600px) {
+    .content-wrapper {
+        width: 90%;
+    }
+
+    .button-container {
+        width: 100%;
+    } 
+
+    .phone-form {
+        width: 90%;
+    }
+      
+    .input-form {
+         width: 100%;
+    }
+       
+    #tel {
+      height: 60px;
+      font-size: 18px;
+    }
+
+    h3 {
+      font-size: 18px;
+    }   
+}
+
+
+</style>
