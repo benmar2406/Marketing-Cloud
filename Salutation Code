@@ -1,0 +1,115 @@
+<!==
+
+%%[
+    VAR @FirstName, @LastName, @Salutation, @fullSalutation, @SubjectSalutation
+
+
+    /* Versuche, Werte aus verschiedenen möglichen Spaltennamen zu beziehen */
+    
+    /* Vorname */
+    SET @FirstName = AttributeValue("Vorname")
+    IF EMPTY(@FirstName) THEN
+        SET @FirstName = AttributeValue("FirstName")
+    ENDIF
+    IF EMPTY(@FirstName) THEN
+        SET @FirstName = AttributeValue("Contact:FirstName")
+    ENDIF
+    IF EMPTY(@FirstName) THEN
+        SET @FirstName = AttributeValue("Opportunity:Account:FirstName")
+    ENDIF
+    IF EMPTY(@FirstName) THEN
+        SET @FirstName = AttributeValue("Event:Who:Contact:FirstName")
+    ENDIF
+
+
+    /*Nachname*/
+    SET @LastName = AttributeValue("Nachname")
+    IF EMPTY(@LastName) THEN
+        SET @LastName = AttributeValue("LastName")
+    ENDIF
+    IF EMPTY(@LastName) THEN
+        SET @LastName = AttributeValue("Contact:LastName")
+    ENDIF
+    IF EMPTY(@LastName) THEN
+        SET @LastName = AttributeValue("Opportunity:Account:LastName")
+    ENDIF
+    IF EMPTY(@LastName) THEN
+        SET @LastName = AttributeValue("Event:Who:Contact:LastName")
+    ENDIF
+
+
+    /*Salutation*/
+    SET @Salutation = AttributeValue("Anrede")
+    IF EMPTY(@Salutation) THEN
+        SET @Salutation = AttributeValue("Salutation")
+    ENDIF
+    IF EMPTY(@Salutation) THEN
+        SET @Salutation = AttributeValue("Contact:Salutation")
+    ENDIF
+    IF EMPTY(@Salutation) THEN
+        SET @Salutation = AttributeValue("Opportunity:Account:Salutation")
+    ENDIF
+    IF EMPTY(@Salutation) THEN
+        SET @Salutation = AttributeValue("Event:Who:Contact:LastName")
+    ENDIF
+
+    SET @Title = AttributeValue("Titel")
+    IF EMPTY(@Title) THEN
+        SET @title = AttributeValue("Title")
+    ENDIF
+    IF EMPTY(@Title) THEN
+        SET @Title = AttributeValue("Contact:Title")
+    ENDIF
+    IF EMPTY(@Title) THEN
+        SET @Title = AttributeValue("Opportunity:Account:Title")
+    ENDIF
+    IF EMPTY(@Title) THEN
+        SET @Title = AttributeValue("Event:Who:Contact:Title")
+    ENDIF
+
+
+    /*Generiere Salutation für Ansprache im Mailing und im Betreff */
+   
+    IF (@Salutation == 'Divers') THEN
+        IF NOT EMPTY (@FirstName) AND NOT EMPTY (@LastName) THEN
+            IF NOT EMPTY (@Title) THEN
+                SET @fullSalutation = Concat("Liebe:r ", @Title, " ", @FirstNane, " ", @LastName)
+            ELSE
+                SET @fullSalutation = Concat("Liebe:r ", @FirstNane, " ", @LastName)
+            ENDIF
+        ELSE
+            SET @fullSalutation = "Liebe:r Interessent:in"
+        ENDIF
+   
+
+    ELSEIF (@Salutation == 'Herr') THEN
+        IF NOT EMPTY(@LastName) THEN
+            IF NOT EMPTY(@Title) THEN 
+                SET @fullSalutation = Concat("Lieber ", @salutation, " ", @Title , " ", @LastName)
+            ELSE    
+                SET @fullSalutation = Concat("Lieber ", @salutation, " ", @LastName)
+            ENDIF 
+        ELSE    
+            SET @fullSalutation = "Lieber Interessent" 
+        ENDIF
+
+    ELSEIF (@Salutation == 'Frau') THEN
+        IF NOT EMPTY(@LastName) THEN
+            IF NOT EMPTY(@Title) THEN 
+                SET @fullSalutation = Concat("Liebe ", @salutation, " ", @Title , " ", @LastName)
+            ELSE    
+                SET @fullSalutation = Concat("Liebe ", @salutation, " ", @LastName)
+            ENDIF 
+        ELSE    
+            SET @fullSalutation = "Liebe Interessentin"
+        ENDIF
+
+    ELSE   
+        SET @fullSalutation = "Liebe:r Interessent:in"
+
+    ENDIF
+
+
+]%%
+
+==>
