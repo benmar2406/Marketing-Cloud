@@ -1,0 +1,32 @@
+<table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="min-width: 100%; " class="stylingblock-content-wrapper"><tr><td class="stylingblock-content-wrapper camarker-inner"><table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="min-width: 100%; " class="stylingblock-content-wrapper"><tr><td class="stylingblock-content-wrapper camarker-inner">
+%%[ 
+    VAR @accountId, @firstName, @lastName, @mobilePhone, @confirmationUrl 
+    SET @accountId = AttributeValue("AccountId")
+    SET @firstName = AttributeValue("Vorname")
+    SET @lastName = AttributeValue("Nachname") 
+    SET @confirmationUrl = CloudPagesURL(1147, 'accountId', @accountId) 
+    SET @personAccounts = RetrieveSalesforceObjects("Account", "WA_Mobile_Number__pc", "Id", "=", @accountId) 
+    
+    /*Wenn ein Account vorhanden ist prüfe ob bereits eine Mobilnummer angegeben wurde und update den Whatsapp Single Opt In*/
+    IF RowCount(@personAccounts) > 0 THEN 
+        SET @personAccount = Row(@personAccounts, 1) 
+        SET @mobilePhone = Field(@personAccount, "WA_Mobile_Number__pc") 
+
+        
+        IF NOT EMPTY(@mobilePhone) THEN 
+            SET @updatePersonAccount = UpdateSingleSalesforceObject("Account", @accountId, "WA_SOI__pc", "true") ]%%
+
+            <div class="content-wrapper">
+            <span class="greeting-message"><b>Hallo %%=v(@firstName)=%% %%=v(@lastName)=%%,<br>
+            wenn Sie von uns auf Whatsapp mit werblichen Inhalten kontaktiert werden m&ouml;chten, best&auml;tigen Sie bitte.</b></span><br>
+            <br>
+            &nbsp;<div class="button-container">
+            <a alias="" class="confirmation-button" conversion="false" data-linkto="other" href="%%=RedirectTo(@confirmationUrl)=%% " title="">Best&auml;tigen</a></div> <span class="consent-message"><b>Sie k&ouml;nnen die Einwilligung jederzeit widerrufen.</b></span><br>
+            &nbsp;</div> 
+    
+    /*Wenn noch keine Mobilnummer hinterlegt wurde generiere ein Formular zur Abfrage der Nummer*/
+    %%[ ELSE ]%%
+        <form action="%%=RedirectTo(@confirmationUrl)=%%" class="phone-form" method="post"><h3>
+        Hallo %%=v(@firstName)=%% %%=v(@lastName)=%%, bitte geben Sie Ihre Mobilnummer ein wenn Sie von uns auf Whatsapp kontaktiert werden m&ouml;chten.</h3><div class="input-form">
+        <input id="tel" name="tel" pattern="(\+49\d{10,13})" required="" title="Bitte geben Sie eine deutsche Nummer (+49) an." type="tel" value="+49"> <input class="phone-confirmation-button" type="submit" value="Bestätigen"></div></form> %%[ ENDIF ELSE ]%% <span>Das hat leider nicht funktioniert. Wenden Sie sich bitte an <a alias="beratung@sgd.de" conversion="false" data-linkto="mailto:" href="mailto:place@holder.de?subject=" style="color:#000000;text-decoration:underline;" title="place@holder.de">place@holder.de</a></span> 
+    %%[ ENDIF ]%%</td></tr></table></td></tr></table>
