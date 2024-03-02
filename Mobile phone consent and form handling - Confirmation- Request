@@ -1,4 +1,4 @@
-<table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="min-width: 100%; " class="stylingblock-content-wrapper"><tr><td class="stylingblock-content-wrapper camarker-inner"><table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="min-width: 100%; " class="stylingblock-content-wrapper"><tr><td class="stylingblock-content-wrapper camarker-inner">
+/*Part one / Cloud page script for the mobile phone consent handling*/
 %%[ 
     VAR @accountId, @firstName, @lastName, @mobilePhone, @confirmationUrl 
     SET @accountId = AttributeValue("AccountId")
@@ -7,7 +7,7 @@
     SET @confirmationUrl = CloudPagesURL(1147, 'accountId', @accountId) 
     SET @personAccounts = RetrieveSalesforceObjects("Account", "WA_Mobile_Number__pc", "Id", "=", @accountId) 
     
-    /*Wenn ein Account vorhanden ist prüfe ob bereits eine Mobilnummer angegeben wurde und update den Whatsapp Single Opt In*/
+    /*If an account exists, check if a mobile number has already been provided and update the WhatsApp Single Opt-In*/
     IF RowCount(@personAccounts) > 0 THEN 
         SET @personAccount = Row(@personAccounts, 1) 
         SET @mobilePhone = Field(@personAccount, "WA_Mobile_Number__pc") 
@@ -24,7 +24,7 @@
             <a alias="" class="confirmation-button" conversion="false" data-linkto="other" href="%%=RedirectTo(@confirmationUrl)=%% " title="">Best&auml;tigen</a></div> <span class="consent-message"><b>Sie k&ouml;nnen die Einwilligung jederzeit widerrufen.</b></span><br>
             &nbsp;</div> 
     
-    /*Wenn noch keine Mobilnummer hinterlegt wurde generiere ein Formular zur Abfrage der Nummer*/
+    /*If no mobile number has been registered yet, generate a form to request the number*/
     %%[ ELSE ]%%
         <form action="%%=RedirectTo(@confirmationUrl)=%%" class="phone-form" method="post"><h3>
         Hallo %%=v(@firstName)=%% %%=v(@lastName)=%%, bitte geben Sie Ihre Mobilnummer ein wenn Sie von uns auf Whatsapp kontaktiert werden m&ouml;chten.</h3><div class="input-form">
