@@ -1,4 +1,5 @@
 /* Please note: script is made for Marketing Cloud Multi Org setup. It allows to query for business unit specific subscribers on the All Subscribers List which not yet have a value set for Business Unit Subscriber Filter.*/
+/*The script is used as a first step to populate a data extension with contacts that not have the business unit filter attribute assigned, in the followng steps in the automation the value is updated/imported in All Subscribers list*/
 
 SELECT DISTINCT
     sub.SubscriberKey AS [Subscriber Key],
