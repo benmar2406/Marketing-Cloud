@@ -68,7 +68,7 @@
     ENDIF
 
 
-    /* Generate salutation for use in the mailing and in the subject line */
+    /* Generate salutation for use in the mailing and in the subject line based on gender and title if exsiting */
    
     IF (@Salutation == 'Divers') THEN
         IF NOT EMPTY (@FirstName) AND NOT EMPTY (@LastName) THEN
