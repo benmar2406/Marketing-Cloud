@@ -1,14 +1,16 @@
+/*Thank you page for the mobile phone consent handling*/
 %%[
 
         VAR @accountId, @updateWhatsappConsent, @phoneNumber, @updatePhoneNumber
-
+        /*Retrieve Accoung Id from previous Cloud Page*/
         SET @accountId = QueryParameter("accountId")
 
+        /*Update Consent in Core Cloud*/
         SET @updateWhatsappConsent = UpdateSingleSalesforceObject(
                 "Account", @accountId, 
                 "WA_DOI__pc", "true"
                 )
-        
+        /*If a phone number was submitted update in Core Cloud.*/
         SET @phoneNumber = RequestParameter("tel")
                 IF NOT EMPTY(@phoneNumber) THEN
                         SET @updatePhoneNumber = UpdateSingleSalesforceObject(
