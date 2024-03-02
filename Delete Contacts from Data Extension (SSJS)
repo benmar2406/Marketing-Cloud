@@ -1,3 +1,5 @@
+/* Script to automate contact deletion in Marketing Cloud via API Call. Script can be used in a script activity in automation studio. Logs errors to Log Data Extension. */
+
 <script runat="server">
 Platform.Load("Core", "1");
 
