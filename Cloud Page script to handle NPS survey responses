@@ -1,18 +1,18 @@
-
+/* Cloud page script that handles the submission of a NPS rating via a link from an email. Checks if a submission was already made for the contract */
 
 %%[
 
     VAR @accountid, @nps, @npsInt, @createSurveyResponse, @surveyName, @vertragsid, @existingSurveys, @rowCount, @ResponseConditions
-    /* Übernehme Paramater Values aus dem Mailing */
+    /* Take Parameter Values from the Mailing */
     SET @nps = QueryParameter("nps")
     SET @accountid = QueryParameter("Id")
     SET @surveyName = QueryParameter("sn")
     SET @vertragsid = QueryParameter("vid")
-    /*wandle den nps String in einen Int Wert um */
+    /* Convert the nps String into an Int value */
     SET @npsInt = FormatNumber(@nps,"G")
     SET @ResponseConditions = false
 
-    /*Prüfe anhand der aktuellen Vertrags Id ob es bestehende Records zum aktuellen Vertrag gibt */
+    /* Check based on the current contract Id if there are existing records for the current contract */
     SET @existingSurveys = RetrieveSalesforceObjects(
       'Surveymonkey_Response__c', 
       'Name', 
@@ -20,26 +20,26 @@
 
     SET @rowCount = rowcount(@existingSurveys) 
     IF (@rowCount == 0) THEN
-        /* wenn noch keine Survey zum Vertrag exisitert kann diese erstellt werden */
+        /* if no survey exists for the contract, it can be created */
         SET @ResponseConditions = true
 
     ELSEIF (@rowCount > 0) THEN
         VAR @row, @counter
-        /* wenn mindestens eine Survey existiert loope durch die Records und... */
+        /* if at least one survey exists, loop through the records and... */
         FOR @counter = 1 to @rowCount DO
             SET @row = row(@existingSurveys, @counter)
             SET @exSurveyName = field(@row,"Name")
-            /*...prüfe, ob es sich um die gleiche oder eine andere Survey handelt bzw. bereits eine Bewertung vorgenommen wurde (aktuell sind die Umfragen nach 4 Monaten und nach 6 Monaten angesetzt) */
+            /*...check if it is the same or a different survey or if a rating has already been made (currently, the surveys are set after 4 months and after 6 months) */
             IF (@exSurveyName == @surveyName)
-                THEN /* Mache nichts, da bereits eine Bewertung durch den Kunden mit dem gleichen Vertrag zur gleichen Umfrage abgegeben wurde*/
+                THEN /* Do nothing, as a rating has already been submitted by the customer with the same contract for the same survey */
             ELSE
-                /*wenn keiner der Surveynames übereinstimmt wurde noch keine Umfrage abgegeben*/
+                /*if none of the survey names match, no survey has been submitted yet*/
                 SET @ResponseConditions = true
             ENDIF
             NEXT
 
     ENDIF
-    /* Wenn die obigen Kriterien erfüllt wurden, erstelle die Response in der Sales Cloud anhand der aus dem Mailing übergebenen Werte*/
+    /* If the above criteria have been met, create the response in the Sales Cloud based on the values passed from the mailing*/
     IF @ResponseConditions == true THEN
     
       SET @createSurveyResponse = CreateSalesforceObject(
@@ -52,11 +52,12 @@
         "Vertrag__c", @vertragsid,
         "BU__c", "ACME placeholder"
        )
-        /* Stelle den Danketext dar */    
+        /* Display the thank you text */    
         ]%%
-        <div style="text-align: center;"><b><span style="font-family:Arial,Helvetica,sans-serif; font-size:22px; color:#89C82F;">Vielen Dank f&uuml;r Ihre R&uuml;ckmeldung. Wir haben Ihre Bewertung mit aufgenommen.</span></b></div>
+        <div style="text-align: center;"><b><span style="font-family:Arial,Helvetica,sans-serif; font-size:22px; color:#89C82F;">Thank you for your feedback. We have recorded your evaluation.</span></b></div>
     
     %%[ ELSE ]%%
-        <div style="text-align: center;"><b><span style="font-family:Arial,Helvetica,sans-serif; font-size:22px; color:#89C82F;">Entschuldigung, Sie haben die Bewertung bereits abgeschlossen.</span></b></div>
+        /* Display message that submission already was made */   
+        <div style="text-align: center;"><b><span style="font-family:Arial,Helvetica,sans-serif; font-size:22px; color:#89C82F;">Sorry, you have already completed the evaluation.</span></b></div>
     %%[ ENDIF 
 ]%%
