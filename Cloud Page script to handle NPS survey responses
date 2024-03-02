@@ -5,9 +5,9 @@
     VAR @accountid, @nps, @npsInt, @createSurveyResponse, @surveyName, @vertragsid, @existingSurveys, @rowCount, @ResponseConditions
     /* Retrieve Parameter Values from Mailing */
     SET @nps = QueryParameter("nps")
-    SET @accountid = QueryParameter("Id")
+    SET @accountId = QueryParameter("Id")
     SET @surveyName = QueryParameter("sn")
-    SET @vertragsid = QueryParameter("vid")
+    SET @contractId = QueryParameter("vid")
     /* Convert the nps String into an Int value */
     SET @npsInt = FormatNumber(@nps,"G")
     SET @ResponseConditions = false
@@ -16,7 +16,7 @@
     SET @existingSurveys = RetrieveSalesforceObjects(
       'Surveymonkey_Response__c', 
       'Name', 
-      'Vertrag__c', '=', @vertragsid)
+      'Vertrag__c', '=', @contractId)
 
     SET @rowCount = rowcount(@existingSurveys) 
     IF (@rowCount == 0) THEN
@@ -45,11 +45,11 @@
       SET @createSurveyResponse = CreateSalesforceObject(
         "Surveymonkey_Response__c", 7,
         "Name", @surveyName,
-        "Account__c", @accountid,
+        "Account__c", @accountId,
         "Promoter_Score__c", @npsInt,
         "Response_ID__c", "MC Response",
         "Response_Status__c", "completed",
-        "Vertrag__c", @vertragsid,
+        "Vertrag__c", @contractId,
         "BU__c", "ACME placeholder"
        )
         /* Display the thank you text */    
