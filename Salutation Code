@@ -1,12 +1,10 @@
-<!==
-
 %%[
     VAR @FirstName, @LastName, @Salutation, @fullSalutation, @SubjectSalutation
 
 
-    /* Versuche, Werte aus verschiedenen möglichen Spaltennamen zu beziehen */
+    /* Try to obtain values from different possible column names */
     
-    /* Vorname */
+    /* First name */
     SET @FirstName = AttributeValue("Vorname")
     IF EMPTY(@FirstName) THEN
         SET @FirstName = AttributeValue("FirstName")
@@ -22,7 +20,7 @@
     ENDIF
 
 
-    /*Nachname*/
+    /* Last name */
     SET @LastName = AttributeValue("Nachname")
     IF EMPTY(@LastName) THEN
         SET @LastName = AttributeValue("LastName")
@@ -38,7 +36,7 @@
     ENDIF
 
 
-    /*Salutation*/
+    /* Salutation */
     SET @Salutation = AttributeValue("Anrede")
     IF EMPTY(@Salutation) THEN
         SET @Salutation = AttributeValue("Salutation")
@@ -68,7 +66,7 @@
     ENDIF
 
 
-    /*Generiere Salutation für Ansprache im Mailing und im Betreff */
+    /* Generate salutation for use in the mailing and in the subject line */
    
     IF (@Salutation == 'Divers') THEN
         IF NOT EMPTY (@FirstName) AND NOT EMPTY (@LastName) THEN
@@ -111,5 +109,3 @@
 
 
 ]%%
-
-==>
