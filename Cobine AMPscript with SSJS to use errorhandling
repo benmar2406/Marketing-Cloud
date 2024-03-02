@@ -1,0 +1,16 @@
+<script runat="server">
+    Platform.Load("core", "1");
+    
+   try {
+      var ampscript = Platform.Function.ContentBlockByID("{{Content Block Id}}");
+      Write(TreatAsContent(ampscript));
+      
+   } catch (ex) {
+        var logDE = DataExtension.Init("{{Your Log Data Extension}}");
+        var date = new Date();
+        var Id = Platform.Function.GUID();
+        var cid = Variable.GetValue("@Id");
+        
+        logDE.Rows.Add({ LogID: Id, Level: "critical", Source: "Cloud Page: DOI Confirm", Message: Platform.Function.Stringify(ex), ContactId: cid, CreatedAt: date });
+    }
+</script>
