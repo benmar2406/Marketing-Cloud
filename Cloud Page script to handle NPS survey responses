@@ -3,7 +3,7 @@
 %%[
 
     VAR @accountid, @nps, @npsInt, @createSurveyResponse, @surveyName, @vertragsid, @existingSurveys, @rowCount, @ResponseConditions
-    /* Take Parameter Values from the Mailing */
+    /* Retrieve Parameter Values from Mailing */
     SET @nps = QueryParameter("nps")
     SET @accountid = QueryParameter("Id")
     SET @surveyName = QueryParameter("sn")
