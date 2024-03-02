@@ -1,3 +1,5 @@
+/* Please note: script is made for Marketing Cloud Multi Org setup. It allows to query for business unit specific subscribers on the All Subscribers List which not yet have a value set for Business Unit Subscriber Filter.*/
+
 SELECT DISTINCT
     sub.SubscriberKey AS [Subscriber Key],
     sub.EmailAddress AS [Email Address]
@@ -9,4 +11,4 @@ JOIN
     ENT._Sent s ON sub.SubscriberKey = s.SubscriberKey
 WHERE
     (Standort IS NULL)
-    AND  s.OYBAccountID = '{{your MID}}'
+    AND  s.OYBAccountID = '{{your MID of business unit}}'
