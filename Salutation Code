@@ -1,3 +1,5 @@
+/*The goal of this salutation code was to be usable in any email with any data extensions respectively with any column names used by marketing. */
+
 %%[
     VAR @FirstName, @LastName, @Salutation, @fullSalutation, @SubjectSalutation
 
