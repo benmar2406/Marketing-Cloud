@@ -1,0 +1,86 @@
+//This script was developed for a scenario where the attendance of online events couldn't directly logged to Sales Cloud. 
+//In this workaround this SSJS script is included in an "invisible" Cloud Page redirecting to the external event page with the purpose to check if it is a plausible check in time for the respective event and if so logs the user as attended.
+//Handles check of the time with the date object including a handling for DST (in the example for CET time)
+
+%%[
+    VAR @eventDateString, @cmId, @cid, @eventPage
+    SET @cId = //retrieve Contact Id
+    SET @cmId = //retrieve CampaignmemberId 
+    SET @eventDateString = "2024-03-05 10:00" 
+    SET @eventPage = "https://www.klett-corporate-education.de/"
+]%%
+
+<script runat="server">
+Platform.Load("core", "1");
+
+try {
+
+   var eventDateString = Variable.GetValue("@eventDateString");
+   var eventDate = new Date(eventDateString);
+
+    // Validate Date 
+    if (!isNaN(eventDate.getTime())) {
+        
+        var dstActive = getDstStatus();
+        Write(dstActive);
+
+        var now = new Date(); //Get the current date and time in GMT-6 (server time)
+
+        if (dstActive === false) {
+            var cetOffsetHours = 7; //Standard CET is UTC+1, and server is GMT-6, so the difference is 7 hours in wintertime
+        } else if (dstActive === true) {
+            var cetOffsetHours = 8; //8 hrs in summertime
+        } 
+
+        var nowCET = new Date(now.getTime() + cetOffsetHours * 3600000);
+        var minutesBeforeEvent = 15;
+        var minutesAfterEventStart = 120;
+        var checkinTime = new Date(eventDate.getTime() - minutesBeforeEvent * 60000);
+        var eventEndTime = new Date(eventDate.getTime() + minutesAfterEventStart * 60000);
+
+        if (nowCET >= checkinTime && nowCET <= eventEndTime) {
+            //Log the user since the click can be counted as attendance.
+            var cmId = Variable.GetValue("@cmId");
+            var updateAttendance = Platform.Function.TreatAsContent('%%[' +
+            'SET @updateResult = UpdateSingleSalesforceObject("CampaignMember", "' + cmId + '", "Status", "Teilgenommen")' +
+            ']%%');
+
+        } else {
+            //Don't log the user since the checkin was made too early to be counted as attendance.
+            }
+
+    } else {
+        //In case an invalid date is retrievedd log error to data extension
+        logError("Invalid date submitted", cId);
+    }
+ 
+      
+} catch (ex) {
+    //Log error to data extension.
+    logError(ex, cId);
+}
+
+// Function to retrieve DST status via API
+function getDstStatus() {
+    var status = [0];
+    var content = Platform.Function.HTTPGet('https://timeapi.io/api/Time/current/zone?timeZone=Europe/Amsterdam',false,0,['x-request-id'],['sampleValue'],status);
+    if(status[0] === 0) {
+        parsedJson = Platform.Function.ParseJSON(content);
+        return parsedJson.dstActive;
+    } else {
+        logError("Error: HTTP status code " + status[0], cId);
+        return null;
+    }
+}
+
+// Function to log to data extension.
+function logError(errorMessage, conId) {
+    var logDE = DataExtension.Init("{{Your log data extension Key}}");
+    var today = new Date();
+    logDE.Rows.Add({ LogID: Platform.Function.GUID(), Level: "critical", Source: "Cloud Page: Event Registration", Message: errorMessage, ContactId: conId, CreatedAt: today });
+}
+
+var eventPage = Variable.GetValue("@eventPage");
+Platform.Response.Redirect(eventPage); 
+
+</script>
