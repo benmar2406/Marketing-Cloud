@@ -7,7 +7,7 @@
     SET @cId = //retrieve Contact Id
     SET @cmId = //retrieve CampaignmemberId 
     SET @eventDateString = "2024-03-05 10:00" 
-    SET @eventPage = "https://www.klett-corporate-education.de/"
+    SET @eventPage = "https://www.eventseite.de/"
 ]%%
 
 <script runat="server">
