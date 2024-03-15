@@ -3,64 +3,97 @@
 //Handles check of the time with the date object including a handling for DST (in the example for CET time)
 
 %%[
-    VAR @eventDateString, @cmId, @cid, @eventPage
-    SET @cId = //retrieve Contact Id
-    SET @cmId = //retrieve CampaignmemberId 
-    SET @eventDateString = "2024-03-05 10:00" 
-    SET @eventPage = "https://www.eventseite.de/"
+    VAR @eventStartDateTime, @eventEndDateTime,  @cmId, @cid, @eventLink
+
+    
+    SET @cId = RequestParameter("cid")
+    SET @cmId = RequestParameter("cmid")
+    SET @eventStartDateTime = RequestParameter("eventStartDateTime")
+    SET @eventEndDateTime = RequestParameter("eventEndDateTime")
+    SET @dstActive = RequestParameter("isDst")
+    SET @eventLink = RequestParameter("eventLink")
 ]%%
+
 
 <script runat="server">
 Platform.Load("core", "1");
 
+
 try {
 
-   var eventDateString = Variable.GetValue("@eventDateString");
-   var eventDate = new Date(eventDateString);
+    var cId = Variable.GetValue("@cId");
+    var eventLink = Variable.GetValue("@eventLink");
+    var dstActiveString = Variable.GetValue("@dstActive"); 
+    var dstActive = (dstActiveString === "true"); //Since the GetValue returns a string even if data extension field is boolean it needs to be converted.
 
-    // Validate Date 
-    if (!isNaN(eventDate.getTime())) {
-        
-        var dstActive = getDstStatus();
-        Write(dstActive);
+    //adjust for winter or summer time
+    if (dstActive === false) {
+            var cetOffsetHoursEvent = 1; 
+        } else {
+            var cetOffsetHoursEvent = 2; 
+        } 
+    var fromHoursToMilliSecs = 3600000
+    var eventStartDateTime = Variable.GetValue("@eventStartDateTime");
+    var eventStart = new Date(eventStartDateTime);
+    var eventStartCET = new Date(eventStart.getTime() + cetOffsetHoursEvent * fromHoursToMilliSecs);
+    var eventEndDateTime = Variable.GetValue("@eventEndDateTime");
+    var eventEnd = new Date(eventEndDateTime);
+    var eventEndCET = new Date(eventEnd.getTime() + cetOffsetHoursEvent * fromHoursToMilliSecs);
+
+    // Validate Date and check link, only if a link exists the user can be redirected to the event page thus only then can be logged as attended
+    if (!isNaN(eventStart.getTime()) && eventLink) {
 
         var now = new Date(); //Get the current date and time in GMT-6 (server time)
-
         if (dstActive === false) {
+             Write("Dst works<br>")
             var cetOffsetHours = 7; //Standard CET is UTC+1, and server is GMT-6, so the difference is 7 hours in wintertime
-        } else if (dstActive === true) {
+        } else {
             var cetOffsetHours = 8; //8 hrs in summertime
         } 
-
-        var nowCET = new Date(now.getTime() + cetOffsetHours * 3600000);
+     
+        var nowCET = new Date(now.getTime() + cetOffsetHours * fromHoursToMilliSecs); //since date object calculates in milliseconds cetOffsetHours needs to be multiplied by 60000 to change from hours to milliseconds
+        Write("nowCET" + nowCET + "<br>")
+      
         var minutesBeforeEvent = 15;
-        var minutesAfterEventStart = 120;
-        var checkinTime = new Date(eventDate.getTime() - minutesBeforeEvent * 60000);
-        var eventEndTime = new Date(eventDate.getTime() + minutesAfterEventStart * 60000);
-
-        if (nowCET >= checkinTime && nowCET <= eventEndTime) {
+        var checkinTime = new Date(eventStartCET.getTime() - minutesBeforeEvent * 60000); //since date object calculates in milliseconds minutesBeforeEvent needs to be multiplied by 60000 to change to milliseconds
+        Write("checkinTime" + checkinTime + "<br>")
+        if (nowCET >= checkinTime && nowCET <= eventEndCET) {
             //Log the user since the click can be counted as attendance.
+             Write("Log user");
             var cmId = Variable.GetValue("@cmId");
             var updateAttendance = Platform.Function.TreatAsContent('%%[' +
             'SET @updateResult = UpdateSingleSalesforceObject("CampaignMember", "' + cmId + '", "Status", "Teilgenommen")' +
             ']%%');
-
+        
         } else {
-            //Don't log the user since the checkin was made too early to be counted as attendance.
-            }
+            //Don't log the user since it is the wrong time.
+        }
 
     } else {
-        //In case an invalid date is retrievedd log error to data extension
-        logError("Invalid date submitted", cId);
+        
     }
- 
       
 } catch (ex) {
     //Log error to data extension.
     logError(ex, cId);
+
 }
 
-// Function to retrieve DST status via API
+//A user should always be redirected to the event page no matter if the attendance logging was successful. Since a try / catch block doesn't work with a redirect (since the user immediately is redirected the promise can't be resolved when the link is correct thus always ending in the catch block)
+//A formally correct event link is ensured through being a (required) Url field in Core Cloud
+var eventLink = Variable.GetValue("@eventLink");
+
+if (eventLink) {
+        Platform.Response.Redirect(eventLink)
+    }
+
+else {
+        logError("Invalid Link", cId);
+        redirect = "https://cloud.service.klett-corporate-education.de/event_error"
+        Platform.Response.Redirect(redirect)
+    }
+
+/* Function to retrieve DST status via API, not necessary with DST information on campaign object
 function getDstStatus() {
     var status = [0];
     var content = Platform.Function.HTTPGet('https://timeapi.io/api/Time/current/zone?timeZone=Europe/Amsterdam',false,0,['x-request-id'],['sampleValue'],status);
@@ -72,15 +105,13 @@ function getDstStatus() {
         return null;
     }
 }
+*/
 
 // Function to log to data extension.
 function logError(errorMessage, conId) {
-    var logDE = DataExtension.Init("{{Your log data extension Key}}");
+    var logDE = DataExtension.Init("49D23AF8-3E4C-4226-89D1-EFACB71A847F");
     var today = new Date();
     logDE.Rows.Add({ LogID: Platform.Function.GUID(), Level: "critical", Source: "Cloud Page: Event Registration", Message: errorMessage, ContactId: conId, CreatedAt: today });
 }
-
-var eventPage = Variable.GetValue("@eventPage");
-Platform.Response.Redirect(eventPage); 
 
 </script>
