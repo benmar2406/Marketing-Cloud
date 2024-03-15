@@ -89,27 +89,14 @@ if (eventLink) {
 
 else {
         logError("Invalid Link", cId);
-        redirect = "https://cloud.service.klett-corporate-education.de/event_error"
+        redirect = "{{link to error page}}"
         Platform.Response.Redirect(redirect)
     }
 
-/* Function to retrieve DST status via API, not necessary with DST information on campaign object
-function getDstStatus() {
-    var status = [0];
-    var content = Platform.Function.HTTPGet('https://timeapi.io/api/Time/current/zone?timeZone=Europe/Amsterdam',false,0,['x-request-id'],['sampleValue'],status);
-    if(status[0] === 0) {
-        parsedJson = Platform.Function.ParseJSON(content);
-        return parsedJson.dstActive;
-    } else {
-        logError("Error: HTTP status code " + status[0], cId);
-        return null;
-    }
-}
-*/
 
 // Function to log to data extension.
 function logError(errorMessage, conId) {
-    var logDE = DataExtension.Init("49D23AF8-3E4C-4226-89D1-EFACB71A847F");
+    var logDE = DataExtension.Init("{{Key of your Log DE}}"");
     var today = new Date();
     logDE.Rows.Add({ LogID: Platform.Function.GUID(), Level: "critical", Source: "Cloud Page: Event Registration", Message: errorMessage, ContactId: conId, CreatedAt: today });
 }
