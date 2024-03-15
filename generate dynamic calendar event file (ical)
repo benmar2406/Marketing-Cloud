@@ -1,0 +1,65 @@
+<script runat="server">
+try{
+</script>
+%%[
+Set @ORGANIZER_txt = 'SalesforceFan'
+SET @UID_txt = "SalesforceFan_"
+SET @DTSTAMP_txt = Concat(Format(Now(),"yyyyMMdd","Date"), "T", Format(Now(),"HHmmss","Date"), "Z")
+SET @DTSTART_txt = Concat(Format(Now(),"yyyyMMdd","Date"), "T", Format(Now(),"HHmm","Date"), "00Z")
+SET @DTEND_txt = Concat(Format(Now(),"yyyyMMdd","Date"), "T", Format(Now(),"HHmm","Date"), "00Z")
+Set @LOCATION_txt = 'India'
+Set @ICS_DESCRIPTION_text = Concat ('Hi, this is a reminder for Salesforce Fan event!!')
+Set @ICS_SUMMARY_text = 'Get Ready for SalesforceFan Event'
+SET @PRODID_txt = "-//SalesforceFan//EN"
+SET @icsMSG = Concat(
+"BEGIN:VCALENDAR\n", 
+"CALSCALE:GREGORIAN\n",
+"METHOD:PUBLISH\n",
+"VERSION:2.0\n",
+"PRODID:", @PRODID_txt, "\n",
+"BEGIN:VFREEBUSY",
+"FREEBUSY;FBTYPE=FREE:", @FREEBUSY_txt, "\n",  
+"ORGANIZER;CN=", @ORGANIZER_txt, "\n",
+"UID:", @UID_txt, "\n",
+"DTSTAMP:", @DTSTAMP_txt, "\n",
+"END:VFREEBUSY\n",
+"BEGIN:VEVENT\n",
+"CLASS:PUBLIC\n",
+"DESCRIPTION:", TreatAsContent(@ICS_DESCRIPTION_text), "\n",
+"DTSTART:", @DTSTART_txt, "\n",
+"DTSTAMP:", @DTSTAMP_txt, "\n",
+"DTEND:", @DTEND_txt, "\n",
+"LOCATION:", @LOCATION_txt, "\n",
+"PRIORITY:5\n",
+"TRANSP:TRANSPARENT\n",
+"SEQUENCE:0\n",
+"STATUS:CONFIRMED\n",
+"SUMMARY:", @ICS_SUMMARY_text, "\n",
+"UID:", @UID_txt, "\n",
+"BEGIN:VALARM\n",
+"TRIGGER:-PT30M\n",
+"ACTION:DISPLAY\n",
+"DESCRIPTION:", TreatAsContent(@ICS_DESCRIPTION_text), "\n",
+"END:VALARM\n",
+"END:VEVENT\n",
+"END:VCALENDAR"
+)
+]%%
+<script runat="server">
+}catch(e){
+Write(Stringify(e));
+}
+</script>
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Download ICS File</title>
+<meta name="description" content="">
+<meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
+<meta name="viewport" content="width=device-width, initial-scale=1">  
+</head>
+<body>
+ 
+</body>
+</html>
