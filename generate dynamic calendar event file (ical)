@@ -1,50 +1,100 @@
+
 <script runat="server">
 try{
 </script>
 %%[
-Set @ORGANIZER_txt = 'SalesforceFan'
-SET @UID_txt = "SalesforceFan_"
-SET @DTSTAMP_txt = Concat(Format(Now(),"yyyyMMdd","Date"), "T", Format(Now(),"HHmmss","Date"), "Z")
-SET @DTSTART_txt = Concat(Format(Now(),"yyyyMMdd","Date"), "T", Format(Now(),"HHmm","Date"), "00Z")
-SET @DTEND_txt = Concat(Format(Now(),"yyyyMMdd","Date"), "T", Format(Now(),"HHmm","Date"), "00Z")
-Set @LOCATION_txt = 'India'
-Set @ICS_DESCRIPTION_text = Concat ('Hi, this is a reminder for Salesforce Fan event!!')
-Set @ICS_SUMMARY_text = 'Get Ready for SalesforceFan Event'
-SET @PRODID_txt = "-//SalesforceFan//EN"
-SET @icsMSG = Concat(
-"BEGIN:VCALENDAR\n", 
-"CALSCALE:GREGORIAN\n",
-"METHOD:PUBLISH\n",
-"VERSION:2.0\n",
-"PRODID:", @PRODID_txt, "\n",
-"BEGIN:VFREEBUSY",
-"FREEBUSY;FBTYPE=FREE:", @FREEBUSY_txt, "\n",  
-"ORGANIZER;CN=", @ORGANIZER_txt, "\n",
-"UID:", @UID_txt, "\n",
-"DTSTAMP:", @DTSTAMP_txt, "\n",
-"END:VFREEBUSY\n",
-"BEGIN:VEVENT\n",
-"CLASS:PUBLIC\n",
-"DESCRIPTION:", TreatAsContent(@ICS_DESCRIPTION_text), "\n",
-"DTSTART:", @DTSTART_txt, "\n",
-"DTSTAMP:", @DTSTAMP_txt, "\n",
-"DTEND:", @DTEND_txt, "\n",
-"LOCATION:", @LOCATION_txt, "\n",
-"PRIORITY:5\n",
-"TRANSP:TRANSPARENT\n",
-"SEQUENCE:0\n",
-"STATUS:CONFIRMED\n",
-"SUMMARY:", @ICS_SUMMARY_text, "\n",
-"UID:", @UID_txt, "\n",
-"BEGIN:VALARM\n",
-"TRIGGER:-PT30M\n",
-"ACTION:DISPLAY\n",
-"DESCRIPTION:", TreatAsContent(@ICS_DESCRIPTION_text), "\n",
-"END:VALARM\n",
-"END:VEVENT\n",
-"END:VCALENDAR"
-)
+    VAR @dtstamp, @uniqueId, @cmid, @campaignDescription, @campaignName, @eventLink, @eventStartDateTime, @eventEndDateTime, @cId
+    SET @ORGANIZER_txt = 'Klett Corporate Education'
+    SET @dtstamp = Format(Now(), "yyyyMMddTHHmmss")
+    SET @UID_txt = Concat("KCE_", @dtstamp)
+    SET @cmid = RequestParameter("cmid")
+    
+    /*Check for available contact data, otherwise stick to the journey data */
+    SET @campaignMembers = LookupRows("CampaignMember_Campaigns", "CampaignMemberId", @cmemberId)
+    
+    IF RowCount(@campaignMembers) > 0 THEN
+        SET @cmember = row(@campaignMembers, 1)
+        
+        SET @campaignDescription = field(@cmember, "Beschreibung_Kampagne")
+        SET @campaignName = field(@cmember, "Name_Kampagne")
+        SET @eventStartDateTime = field(@cmember, "Event_Start")
+        SET @eventEndDateTime = field(@cmember, "Event_Ende")
+        SET @isDst = field(@cmember, "Event_in_DST")
+        SET @@cId = field(@cmember, "ContactId")
+        SET @eventStartDateTimeParam = Format(@eventStartDateTime, "yyyy-MM-ddTHH:mm:ss", "", "UTC")
+        SET @eventEndDateTimeParam = Format(@eventEndDateTime, "yyyy-MM-ddTHH:mm:ss", "", "UTC") 
+        SET @eventLink = field(@cmember, "Event_Link")
+        
+    
+    ELSE
+        SET @campaignDescription = RequestParameter("campaignDescription")
+        SET @campaignName = RequestParameter("campaignName")
+        SET @eventStartDateTime = DateParse(RequestParameter("eventStartDateTime"))
+        SET @eventEndDateTime = DateParse(RequestParameter("eventEndDateTime"))
+        SET @isDst = RequestParameter("isDst")
+        SET @cId = RequestParameter("cid")
+        SET @eventStartDateTimeParam = Format(@eventStartDateTime, "yyyy-MM-ddTHH:mm:ss", "", "UTC")
+        SET @eventEndDateTimeParam = Format(@eventEndDateTime, "yyyy-MM-ddTHH:mm:ss", "", "UTC")
+        SET @eventLink = RequestParameter("eventLink")
+    ENDIF
+
+
+    /*Adjust for daylight savings.*/
+    IF (@isDst == false) THEN
+        SET @eventStartDateTimeCET = DateAdd(@eventStartDateTime, 1, "H")
+        SET @eventEndDateTimeCET = DateAdd(@eventEndDateTime, 1, "H")
+    ELSE 
+        SET @eventStartDateTimeCET = DateAdd(@eventStartDateTime, 2, "H")
+        SET @eventEndDateTimeCET = DateAdd(@eventEndDateTime, 2, "H")
+    ENDIF
+    
+    /*Set to Event handler Cloud Page: Not directly to actual event page. CP 1157 is always required for event handling*/
+    SET @eventHandlerUrl =  CloudPagesURL(1157, "cid", @cId, "cmid", @cmid, "eventStartDateTime", @eventStartDateTimeParam, "eventEndDateTime", @eventEndDateTimeParam, "isDst", @isDst, "eventLink", @eventLink)
+    SET @DTSTAMP_txt = Concat(Format(Now(),"yyyyMMdd","Date"), "T", Format(Now(),"HHmmss","Date"))
+    SET @DTSTART_txt = Concat(Format(@eventStartDateTimeCET,"yyyyMMdd","Date"), "T", Format(@eventStartDateTimeCET,"HHmmss","Date"))
+    SET @DTEND_txt = Concat(Format(@eventEndDateTimeCET,"yyyyMMdd","Date"), "T", Format(@eventEndDateTimeCET,"HHmmss","Date"))
+    SET @LOCATION_txt = CONCAT('Microsoft Teams')
+    SET @ICS_DESCRIPTION_text = CONCAT(@campaignDescription, " ", @eventHandlerUrl)
+    SET @ICS_SUMMARY_text = @campaignName
+    SET @PRODID_txt = "-//KCE_MC//DE"
+    SET @htmlDescription = "<!DOCTYPE html><html><body><h1>%%=v(@campaignName)=%%</h1><p>Hier geht's zur Veranstaltung:</p><br><a href='%%=v(@eventHandlerUrl)=%%' style='background-color:#EB5D45; color:white; padding:10px 20px; text-align:center; display:inline-block; text-decoration:none; border-radius: 5px;'>Zum Event</a><br><br></body></html>"
+    /*Create ical file*/
+    SET @icsMSG = Concat(
+    "BEGIN:VCALENDAR\n", 
+    "CALSCALE:GREGORIAN\n",
+    "METHOD:PUBLISH\n",
+    "VERSION:2.0\n",
+    "PRODID:", @PRODID_txt, "\n",
+    "BEGIN:VFREEBUSY",
+    "FREEBUSY;FBTYPE=FREE:", @FREEBUSY_txt, "\n",  
+    "ORGANIZER;CN=", @ORGANIZER_txt, "\n",
+    "UID:", @UID_txt, "\n",
+    "DTSTAMP:", @DTSTAMP_txt, "\n",
+    "END:VFREEBUSY\n",
+    "BEGIN:VEVENT\n",
+    "CLASS:PUBLIC\n",
+    "DESCRIPTION:", TreatAsContent(@ICS_DESCRIPTION_text), "\n",
+    "X-ALT-DESC;FMTTYPE=text/html:", TreatAsContent(@htmlDescription), "\n", 
+    "DTSTART:", @DTSTART_txt, "\n",
+    "DTSTAMP:", @DTSTAMP_txt, "\n",
+    "DTEND:", @DTEND_txt, "\n",
+    "LOCATION:", @LOCATION_txt, "\n",
+    "PRIORITY:5\n",
+    "TRANSP:TRANSPARENT\n",
+    "SEQUENCE:0\n",
+    "STATUS:CONFIRMED\n",
+    "SUMMARY:", @ICS_SUMMARY_text, "\n",
+    "UID:", @UID_txt, "\n",
+    "BEGIN:VALARM\n",
+    "TRIGGER:-PT30M\n",
+    "ACTION:DISPLAY\n",
+    "DESCRIPTION:", TreatAsContent(@ICS_DESCRIPTION_text), "\n",
+    "END:VALARM\n",
+    "END:VEVENT\n",
+    "END:VCALENDAR"
+    )
 ]%%
+
 <script runat="server">
 }catch(e){
 Write(Stringify(e));
@@ -54,12 +104,31 @@ Write(Stringify(e));
 <html>
 <head>
 <meta charset="utf-8">
-<title>Download ICS File</title>
+<title>Download Kalendereintrag</title>
 <meta name="description" content="">
 <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
 <meta name="viewport" content="width=device-width, initial-scale=1">  
 </head>
 <body>
- 
+
+<script type="text/javascript" runat="client"> 
+var icsMSG = "%%=v(@icsMSG)=%%";
+download("Ihr_Kalendereintrag.ics",icsMSG);
+
+function download(filename, text) {
+var element = document.createElement('a');
+element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+element.setAttribute('download', filename);
+
+element.style.display = 'none';
+document.body.appendChild(element);
+
+element.click();
+
+document.body.removeChild(element);
+}
+</script> 
 </body>
 </html>
+
+
