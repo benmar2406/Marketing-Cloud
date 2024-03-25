@@ -1,51 +1,31 @@
-//This script was developed for a scenario where the attendance of online events couldn't directly logged to Sales Cloud. 
-//In this workaround this SSJS script is included in an "invisible" Cloud Page redirecting to the external event page with the purpose to check if it is a plausible check in time for the respective event and if so logs the user as attended.
-//Handles check of the time with the date object including a handling for DST (in the example for CET time)
-
-%%[
-    VAR @eventStartDateTime, @eventEndDateTime,  @cmId, @cid, @eventLink
-
-    
-    SET @cId = RequestParameter("cid")
-    SET @cmId = RequestParameter("cmid")
-    SET @eventStartDateTime = RequestParameter("eventStartDateTime")
-    SET @eventEndDateTime = RequestParameter("eventEndDateTime")
-    SET @dstActive = RequestParameter("isDst")
-    SET @eventLink = RequestParameter("eventLink")
-]%%
-
-
 <script runat="server">
 Platform.Load("core", "1");
 
+var cId = Request.GetQueryStringParameter("cid");
+var encodedEventLink = Request.GetQueryStringParameter("eventLink");
+eventLink = decodeURIComponent(encodedEventLink);
 
-try {
 
-    var cId = Variable.GetValue("@cId");
-    var eventLink = Variable.GetValue("@eventLink");
-    var dstActiveString = Variable.GetValue("@dstActive"); 
-    var dstActive = (dstActiveString === "true"); //Since the GetValue returns a string even if data extension field is boolean it needs to be converted.
+try {     
+    
+    var dstActive = Request.GetQueryStringParameter("isDst"); 
+    //format dates from AMPscript to SSJS
+    var eventStartDateTime = Request.GetQueryStringParameter("eventStartDateTime");  
+    var eventStartCET = new Date(eventStartDateTime);
+    var eventEndDateTime = Request.GetQueryStringParameter("eventEndDateTime");  
+    var eventEndCET = new Date(eventEndDateTime);
 
-    //adjust for winter or summer time
-    if (dstActive === false) {
-            var cetOffsetHoursEvent = 1; 
-        } else {
-            var cetOffsetHoursEvent = 2; 
-        } 
-    var fromHoursToMilliSecs = 3600000
-    var eventStartDateTime = Variable.GetValue("@eventStartDateTime");
-    var eventStart = new Date(eventStartDateTime);
-    var eventStartCET = new Date(eventStart.getTime() + cetOffsetHoursEvent * fromHoursToMilliSecs);
-    var eventEndDateTime = Variable.GetValue("@eventEndDateTime");
-    var eventEnd = new Date(eventEndDateTime);
-    var eventEndCET = new Date(eventEnd.getTime() + cetOffsetHoursEvent * fromHoursToMilliSecs);
+    Write("eventStartCET: " + eventStartCET)
+    Write("eventEndCET: " + eventEndCET)
+    Write("dstActive: " + dstActive)
+
+
 
     // Validate Date and check link, only if a link exists the user can be redirected to the event page thus only then can be logged as attended
-    if (!isNaN(eventStart.getTime()) && eventLink) {
+    if (!isNaN(eventStartCET.getTime()) && eventLink) {
 
         var now = new Date(); //Get the current date and time in GMT-6 (server time)
         if (dstActive === false) {
-             Write("Dst works<br>")
             var cetOffsetHours = 7; //Standard CET is UTC+1, and server is GMT-6, so the difference is 7 hours in wintertime
         } else {
             var cetOffsetHours = 8; //8 hrs in summertime
@@ -81,7 +61,6 @@ try {
 
 //A user should always be redirected to the event page no matter if the attendance logging was successful. Since a try / catch block doesn't work with a redirect (since the user immediately is redirected the promise can't be resolved when the link is correct thus always ending in the catch block)
 //A formally correct event link is ensured through being a (required) Url field in Core Cloud
-var eventLink = Variable.GetValue("@eventLink");
 
 if (eventLink) {
         Platform.Response.Redirect(eventLink)
@@ -89,14 +68,15 @@ if (eventLink) {
 
 else {
         logError("Invalid Link", cId);
-        redirect = "{{link to error page}}"
+        redirect = "https://cloud.service.klett-corporate-education.de/event_error"
         Platform.Response.Redirect(redirect)
     }
 
 
+
 // Function to log to data extension.
 function logError(errorMessage, conId) {
-    var logDE = DataExtension.Init("{{Key of your Log DE}}"");
+    var logDE = DataExtension.Init("49D23AF8-3E4C-4226-89D1-EFACB71A847F");
     var today = new Date();
     logDE.Rows.Add({ LogID: Platform.Function.GUID(), Level: "critical", Source: "Cloud Page: Event Registration", Message: errorMessage, ContactId: conId, CreatedAt: today });
 }
