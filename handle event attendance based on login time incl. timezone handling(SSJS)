@@ -68,7 +68,7 @@ if (eventLink) {
 
 else {
         logError("Invalid Link", cId);
-        redirect = "https://cloud.service.klett-corporate-education.de/event_error"
+        redirect = "{{Your error handling landing page}}"
         Platform.Response.Redirect(redirect)
     }
 
@@ -76,7 +76,7 @@ else {
 
 // Function to log to data extension.
 function logError(errorMessage, conId) {
-    var logDE = DataExtension.Init("49D23AF8-3E4C-4226-89D1-EFACB71A847F");
+    var logDE = DataExtension.Init("{{Your Data Extension Key}}");
     var today = new Date();
     logDE.Rows.Add({ LogID: Platform.Function.GUID(), Level: "critical", Source: "Cloud Page: Event Registration", Message: errorMessage, ContactId: conId, CreatedAt: today });
 }
