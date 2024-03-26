@@ -1,36 +1,50 @@
+<!==
+
 %%[ 
     VAR @cmid, @campaignDescription, @campaignName, @eventLink, @eventStartDateTime, @eventEndDateTime, @linkToIcalGeneration, @isDst,  @cId
     SET @cmid = AttributeValue("CampaignMember:Id")
     SET @campaignDescription = AttributeValue("CampaignMember:Campaign:Description")
     SET @campaignName = AttributeValue("CampaignMember:Campaign:Name")
     SET @eventLink = AttributeValue("CampaignMember:Campaign:Event_Link__c")
-    SET @isDst = AttributeValue("CampaignMember:Campaign:IsEventInDST__c")
-    SET @eventStartDateTime = AttributeValue("CampaignMember:Campaign:Event_Start_Datetime__c")
-    SET @eventEndDateTime = AttributeValue("CampaignMember:Campaign:Event_End_Datetime__c")
+    SET @encodedEventLink = URLEncode(@eventLink,1,1)
+    
     SET @cId = AttributeValue("CampaignMember:Contact:Id")
 
-    SET @campaignMembers = LookupRows("CampaignMember_Campaigns", "CampaignMemberId", @cmemberId)
+    SET @campaignMembers = LookupRows("CampaignMember_Campaigns", "CampaignMemberId", @cmid)
 
    /*Check if contact data is available*/
    IF RowCount(@campaignMembers) > 0 THEN
         SET @cmember = row(@campaignMembers, 1) 
-        SET @eventStart = field(@cmember, "Event_start")
+        SET @eventStartDateTime = field(@cmember, "Event_Start")
+        SET @eventEndDateTime = field(@cmember, "Event_Ende")
         SET @isDst = field(@cmember, "Event_in_DST")
-    ENDIF
+        SET @debug = "Contactdata"
+        /*Adjust for daylight savings*/
+        IF (@isDst == false) THEN
+            SET @eventStartCET = DateAdd(@eventStartDateTime, 7, "H")
+            SET @eventEndCET = DateAdd(@eventEndDateTime, 7, "H")
+        ELSE 
+            SET @eventStartCET = DateAdd(@eventStartDateTime, 8, "H")
+            SET @eventEndCET = DateAdd(@eventEndDateTime, 8, "H")
+        ENDIF
     
     ELSE
-        /* If no contact data is available retrieve data from journey data extension*/
-        SET @eventStart = @eventStartDateTime
+        /* If no contact data is available retrieve data from journey data extension. The offset needs to be calculated differently since times are displayed differently in SF Data Extensions und regular data extensions*/
         SET @isDst = AttributeValue("CampaignMember:Campaign:IsEventInDST__c")
+        SET @debug = "Journeydata"
+        SET @eventStartDateTime = AttributeValue("CampaignMember:Campaign:Event_Start_Datetime__c")
+        SET @eventEndDateTime = AttributeValue("CampaignMember:Campaign:Event_End_Datetime__c")
+
+        /*Adjust for daylight savings*/
+        IF (@isDst == false) THEN
+            SET @eventStartCET = DateAdd(@eventStartDateTime, 1, "H")
+            SET @eventEndCET = DateAdd(@eventEndDateTime, 1, "H")
+        ELSE 
+            SET @eventStartCET = DateAdd(@eventStartDateTime, 2, "H")
+            SET @eventEndCET = DateAdd(@eventEndDateTime, 2, "H")
+        ENDIF
     ENDIF
 
-   
-    /*Adjust for daylight savings*/
-    IF (@isDst == false) THEN
-         SET @eventStartCET = DateAdd(@eventStart, 1, "H")
-    ELSE 
-       SET @eventStartCET = DateAdd(@eventStart, 2, "H")
-    ENDIF
     
     /*Format for displaying date and time in german format (in email)*/
     SET @formattedEventStartDate = Format(@eventStartCET, "dddd, d. MMMM yyyy, HH:mmtt", "", "de-DE")
@@ -39,9 +53,14 @@
     
     
      /*Format dateteime so that it can be transmitted as a parameter. On the cloudpage it will only be used if no contact data is available.*/
-    SET @eventStartDateTimeParam = Format(@eventStartDateTime, "yyyy-MM-ddTHH:mm:ss", "", "UTC")
-    SET @eventEndDateTimeParam = Format(@eventEndDateTime, "yyyy-MM-ddTHH:mm:ss", "", "UTC") 
+    SET @eventStartDateTimeParam = Format(@eventStartCET, "yyyy-MM-ddTHH:mm:ss", "", "UTC")
+    SET @eventEndDateTimeParam = Format(@eventEndCET, "yyyy-MM-ddTHH:mm:ss", "", "UTC") 
     /*Cloud Page Links: Generate Link for event handling page and for the ical download page */
-    SET @linkToIcalGeneration = CloudPagesURL(1162, "cid", @cId, "cmid", @cmid, "campaignDescription", @campaignDescription, "campaignName", @campaignName, "eventLink", @eventLink, "eventStartDateTime", @eventStartDateTimeParam, "eventEndDateTime", @eventEndDateTimeParam, "isDst", @isDst)
-    SET @linkToEventHandler = CloudPagesURL(1157, "cid", @cId, "cmid", @cmid, "eventStartDateTime", @eventStartDateTimeParam, "eventEndDateTime", @eventEndDateTimeParam, "isDst", @isDst, "eventLink", @eventLink)
+    SET @linkToIcalGeneration = CloudPagesURL(1162, "cid", @cId, "cmid", @cmid, "campaignDescription", @campaignDescription, "campaignName", @campaignName, "eventLink", @encodedEventLink, "eventStartDateTime", @eventStartDateTimeParam, "eventEndDateTime", @eventEndDateTimeParam, "isDst", @isDst)
+    SET @linkToEventHandler = CloudPagesURL(1157, "cid", @cId, "cmid", @cmid, "eventStartDateTime", @eventStartDateTimeParam, "eventEndDateTime", @eventEndDateTimeParam, "isDst", @isDst, "eventLink", @encodedEventLink)
 ]%%
+
+==>
+
+
+
