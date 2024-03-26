@@ -7,32 +7,26 @@ var eventLink = decodeURIComponent(encodedEventLink);
 
 
 try {     
-    
-    var dstActive = Request.GetQueryStringParameter("isDst"); 
+    var dstActiveString = Request.GetQueryStringParameter("isDst");
+    var dstActive = dstActiveString === "true"; // dstActive wird zu true (boolesch), wenn der String "true" ist, sonst false.
     var eventStartDateTime = Request.GetQueryStringParameter("eventStartDateTime");  
     var eventStartCET = new Date(eventStartDateTime);
     var eventEndDateTime = Request.GetQueryStringParameter("eventEndDateTime");  
     var eventEndCET = new Date(eventEndDateTime);
 
-    Write("eventStartCET: " + eventStartCET + "<br>");
-    Write("eventEndCET: " + eventEndCET  + "<br>");
-    Write("dstActive: " + dstActive  + "<br>");
-    Write("encodedEventLink: " + encodedEventLink  + "<br>");
-    Write("eventLink: " + eventLink  + "<br>");
-
 
     // Validate Date and check link, only if a link exists the user can be redirected to the event page thus only then can be logged as attended
     if (!isNaN(eventStartCET.getTime()) && eventLink) {
-
         var now = new Date(); //Get the current date and time in GMT-6 (server time)
+         Write("now: " + now + "<br>");
         if (dstActive === false) {
             var cetOffsetHours = 7; //Standard CET is UTC+1, and server is GMT-6, so the difference is 7 hours in wintertime
         } else {
             var cetOffsetHours = 8; //8 hrs in summertime
         } 
-     
+        var fromHoursToMilliSecs = 3600000;
         var nowCET = new Date(now.getTime() + cetOffsetHours * fromHoursToMilliSecs); //since date object calculates in milliseconds cetOffsetHours needs to be multiplied by 60000 to change from hours to milliseconds
-        Write("nowCET" + nowCET + "<br>");
+        Write("nowCET: " + nowCET + "<br>");
       
         var minutesBeforeEvent = 15;
         var checkinTime = new Date(eventStartCET.getTime() - minutesBeforeEvent * 60000); //since date object calculates in milliseconds minutesBeforeEvent needs to be multiplied by 60000 to change to milliseconds
@@ -68,7 +62,7 @@ if (eventLink) {
 
 else {
         logError("Invalid Link", cId);
-        redirect = "{{Your error handling landing page}}"
+        redirect = "https://cloud.service.klett-corporate-education.de/event_error"
         Platform.Response.Redirect(redirect)
     }
 
@@ -76,7 +70,7 @@ else {
 
 // Function to log to data extension.
 function logError(errorMessage, conId) {
-    var logDE = DataExtension.Init("{{Your Data Extension Key}}");
+    var logDE = DataExtension.Init("49D23AF8-3E4C-4226-89D1-EFACB71A847F");
     var today = new Date();
     logDE.Rows.Add({ LogID: Platform.Function.GUID(), Level: "critical", Source: "Cloud Page: Event Registration", Message: errorMessage, ContactId: conId, CreatedAt: today });
 }
