@@ -36,6 +36,7 @@
         SET @eventEndDateTime = AttributeValue("CampaignMember:Campaign:Event_End_Datetime__c")
 
         /*Adjust for daylight savings*/
+         /*Since time is displayed differently in Salesforce Data Extensions and regular data extensions the offset needs to be calculated differntly in both scenarios.*/
         IF (@isDst == false) THEN
             SET @eventStartCET = DateAdd(@eventStartDateTime, 1, "H")
             SET @eventEndCET = DateAdd(@eventEndDateTime, 1, "H")
