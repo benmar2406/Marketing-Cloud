@@ -3,22 +3,22 @@ Platform.Load("core", "1");
 
 var cId = Request.GetQueryStringParameter("cid");
 var encodedEventLink = Request.GetQueryStringParameter("eventLink");
-eventLink = decodeURIComponent(encodedEventLink);
+var eventLink = decodeURIComponent(encodedEventLink);
 
 
 try {     
     
     var dstActive = Request.GetQueryStringParameter("isDst"); 
-    //format dates from AMPscript to SSJS
     var eventStartDateTime = Request.GetQueryStringParameter("eventStartDateTime");  
     var eventStartCET = new Date(eventStartDateTime);
     var eventEndDateTime = Request.GetQueryStringParameter("eventEndDateTime");  
     var eventEndCET = new Date(eventEndDateTime);
 
-    Write("eventStartCET: " + eventStartCET)
-    Write("eventEndCET: " + eventEndCET)
-    Write("dstActive: " + dstActive)
-
+    Write("eventStartCET: " + eventStartCET + "<br>");
+    Write("eventEndCET: " + eventEndCET  + "<br>");
+    Write("dstActive: " + dstActive  + "<br>");
+    Write("encodedEventLink: " + encodedEventLink  + "<br>");
+    Write("eventLink: " + eventLink  + "<br>");
 
 
     // Validate Date and check link, only if a link exists the user can be redirected to the event page thus only then can be logged as attended
@@ -32,7 +32,7 @@ try {
         } 
      
         var nowCET = new Date(now.getTime() + cetOffsetHours * fromHoursToMilliSecs); //since date object calculates in milliseconds cetOffsetHours needs to be multiplied by 60000 to change from hours to milliseconds
-        Write("nowCET" + nowCET + "<br>")
+        Write("nowCET" + nowCET + "<br>");
       
         var minutesBeforeEvent = 15;
         var checkinTime = new Date(eventStartCET.getTime() - minutesBeforeEvent * 60000); //since date object calculates in milliseconds minutesBeforeEvent needs to be multiplied by 60000 to change to milliseconds
@@ -46,7 +46,7 @@ try {
             ']%%');
         
         } else {
-            //Don't log the user since it is the wrong time.
+            //Don't log the user since it is no plausible time to attend.
         }
 
     } else {
