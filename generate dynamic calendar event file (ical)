@@ -3,14 +3,14 @@
 try{
 </script>
 %%[
-    VAR @dtstamp, @uniqueId, @cmid, @campaignDescription, @campaignName, @eventLink, @eventStartDateTime, @eventEndDateTime, @cId
+    VAR @dtstamp, @uniqueId, @cmid, @campaignDescription, @campaignName, @eventLink, @eventStartDateTime, @eventEndDateTime, @cId, @encodedEventLink
     SET @ORGANIZER_txt = 'Klett Corporate Education'
     SET @dtstamp = Format(Now(), "yyyyMMddTHHmmss")
     SET @UID_txt = Concat("KCE_", @dtstamp)
     SET @cmid = RequestParameter("cmid")
     
     /*Check for available contact data, otherwise stick to the journey data */
-    SET @campaignMembers = LookupRows("CampaignMember_Campaigns", "CampaignMemberId", @cmemberId)
+    SET @campaignMembers = LookupRows("CampaignMember_Campaigns", "CampaignMemberId", @cmid)
     
     IF RowCount(@campaignMembers) > 0 THEN
         SET @cmember = row(@campaignMembers, 1)
@@ -24,35 +24,28 @@ try{
         SET @eventStartDateTimeParam = Format(@eventStartDateTime, "yyyy-MM-ddTHH:mm:ss", "", "UTC")
         SET @eventEndDateTimeParam = Format(@eventEndDateTime, "yyyy-MM-ddTHH:mm:ss", "", "UTC") 
         SET @eventLink = field(@cmember, "Event_Link")
+        SET @encodedEventLink = URLEncode(@eventLink, 1, 1)
         
-    
     ELSE
-        SET @campaignDescription = RequestParameter("campaignDescription")
-        SET @campaignName = RequestParameter("campaignName")
+        SET @campaignDescription = QueryParameter("campaignDescription")
+        SET @campaignName = QueryParameter("campaignName")
         SET @eventStartDateTime = DateParse(RequestParameter("eventStartDateTime"))
         SET @eventEndDateTime = DateParse(RequestParameter("eventEndDateTime"))
-        SET @isDst = RequestParameter("isDst")
-        SET @cId = RequestParameter("cid")
+        SET @isDst = QueryParameter("isDst")
+        SET @cId = QueryParameter("cid")
         SET @eventStartDateTimeParam = Format(@eventStartDateTime, "yyyy-MM-ddTHH:mm:ss", "", "UTC")
         SET @eventEndDateTimeParam = Format(@eventEndDateTime, "yyyy-MM-ddTHH:mm:ss", "", "UTC")
-        SET @eventLink = RequestParameter("eventLink")
+        SET @encodedEventLink = QueryParameter("eventLink")
     ENDIF
 
 
-    /*Adjust for daylight savings.*/
-    IF (@isDst == false) THEN
-        SET @eventStartDateTimeCET = DateAdd(@eventStartDateTime, 1, "H")
-        SET @eventEndDateTimeCET = DateAdd(@eventEndDateTime, 1, "H")
-    ELSE 
-        SET @eventStartDateTimeCET = DateAdd(@eventStartDateTime, 2, "H")
-        SET @eventEndDateTimeCET = DateAdd(@eventEndDateTime, 2, "H")
-    ENDIF
-    
+
     /*Set to Event handler Cloud Page: Not directly to actual event page. CP 1157 is always required for event handling*/
-    SET @eventHandlerUrl =  CloudPagesURL(1157, "cid", @cId, "cmid", @cmid, "eventStartDateTime", @eventStartDateTimeParam, "eventEndDateTime", @eventEndDateTimeParam, "isDst", @isDst, "eventLink", @eventLink)
+ 
+    SET @eventHandlerUrl =  CloudPagesURL(1157, "cid", @cId, "cmid", @cmid, "eventStartDateTime", @eventStartDateTimeParam, "eventEndDateTime", @eventEndDateTimeParam, "isDst", @isDst, "eventLink", @encodedEventLink)
     SET @DTSTAMP_txt = Concat(Format(Now(),"yyyyMMdd","Date"), "T", Format(Now(),"HHmmss","Date"))
-    SET @DTSTART_txt = Concat(Format(@eventStartDateTimeCET,"yyyyMMdd","Date"), "T", Format(@eventStartDateTimeCET,"HHmmss","Date"))
-    SET @DTEND_txt = Concat(Format(@eventEndDateTimeCET,"yyyyMMdd","Date"), "T", Format(@eventEndDateTimeCET,"HHmmss","Date"))
+    SET @DTSTART_txt = Concat(Format(@eventStartDateTime,"yyyyMMdd","Date"), "T", Format(@eventStartDateTime,"HHmmss","Date"))
+    SET @DTEND_txt = Concat(Format(@eventEndDateTime,"yyyyMMdd","Date"), "T", Format(@eventEndDateTime,"HHmmss","Date"))
     SET @LOCATION_txt = CONCAT('Microsoft Teams')
     SET @ICS_DESCRIPTION_text = CONCAT(@campaignDescription, " ", @eventHandlerUrl)
     SET @ICS_SUMMARY_text = @campaignName
