@@ -1,0 +1,75 @@
+// Email validation by Soumya Ranjan Singh
+
+<script runat="server">
+
+  Platform.Load("Core", "1");
+
+  try {
+
+    // Function to fetch access token
+
+    function getAccessToken() {
+
+      var tokenUrl = 'https://{Subdomain}.https://lnkd.in/grRwwQdW';
+
+      var contentType = 'application/json';
+
+      var tokenPayload = {
+
+        "grant_type": "client_credentials",
+
+        "client_id": "your client id",
+
+        "client_secret": "your client secret",
+
+        "account_id": "mid"
+
+      };
+
+
+      var tokenResponse = HTTP.Post(tokenUrl, contentType, Stringify(tokenPayload));
+
+      var tokenStatusCode = tokenResponse.StatusCode;
+
+      var tokenObj = Platform.Function.ParseJSON(tokenResponse.Response + '');
+
+
+      if (tokenStatusCode === 200 && tokenObj && tokenObj.access_token) {
+
+        return tokenObj.access_token;
+
+      } else {
+
+        throw "Failed to obtain access token.";
+
+      }
+
+    }
+
+    
+
+    var accessToken = getAccessToken();
+
+    var authorizationHeader = 'Bearer ' + accessToken;
+
+    var content = [0];
+
+    var emailValidationPayload = {
+
+      "email": "xyz@gmail.com",
+
+      "validators": [ "SyntaxValidator", "MXValidator", "ListDetectiveValidator" ]
+
+    }
+
+    var postResponse = Platform.Function.HTTPPost('https://{Subdomain}.https://lnkd.in/gdMQxKsK); 
+
+     Platform.Response.Write(content[0]);
+
+  } catch (ex) {
+
+    Platform.Response.Write("Error message: " + ex);
+
+  }
+
+</script>
