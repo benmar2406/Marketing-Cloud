@@ -3,7 +3,10 @@ Platform.Load("core", "1");
 
 var cId = Request.GetQueryStringParameter("cid");
 var encodedEventLink = Request.GetQueryStringParameter("eventLink");
-var eventLink = decodeURIComponent(encodedEventLink);
+
+if(encodedEventLink) {
+    var eventLink = decodeURIComponent(encodedEventLink);
+  }
 
 
 try {     
