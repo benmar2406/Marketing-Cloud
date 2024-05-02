@@ -65,7 +65,7 @@ if (eventLink) {
 
 else {
         logError("Invalid Link", cId);
-        redirect = "https://cloud.service.klett-corporate-education.de/event_error"
+        redirect = "https://placeholder-error-site.com"
         Platform.Response.Redirect(redirect)
     }
 
