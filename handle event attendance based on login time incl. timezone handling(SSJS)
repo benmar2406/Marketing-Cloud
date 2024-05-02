@@ -3,21 +3,17 @@ Platform.Load("core", "1");
 
 var cId = Request.GetQueryStringParameter("cid");
 var encodedEventLink = Request.GetQueryStringParameter("eventLink");
-
 if(encodedEventLink) {
     var eventLink = decodeURIComponent(encodedEventLink);
   }
-
+var dstActiveString = Request.GetQueryStringParameter("isDst");
+var dstActive = dstActiveString === "true"; // dstActive wird zu true (boolesch), wenn der String "true" ist, sonst false.
+var eventStartDateTime = Request.GetQueryStringParameter("eventStartDateTime");  
+var eventStartCET = new Date(eventStartDateTime);
+var eventEndDateTime = Request.GetQueryStringParameter("eventEndDateTime");  
+var eventEndCET = new Date(eventEndDateTime);
 
 try {     
-    var dstActiveString = Request.GetQueryStringParameter("isDst");
-    var dstActive = dstActiveString === "true"; // dstActive wird zu true (boolesch), wenn der String "true" ist, sonst false.
-    var eventStartDateTime = Request.GetQueryStringParameter("eventStartDateTime");  
-    var eventStartCET = new Date(eventStartDateTime);
-    var eventEndDateTime = Request.GetQueryStringParameter("eventEndDateTime");  
-    var eventEndCET = new Date(eventEndDateTime);
-
-
     // Validate Date and check link, only if a link exists the user can be redirected to the event page thus only then can be logged as attended
     if (!isNaN(eventStartCET.getTime()) && eventLink) {
         var now = new Date(); //Get the current date and time in GMT-6 (server time)
