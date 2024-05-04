@@ -53,6 +53,7 @@
         SET @Salutation = AttributeValue("Event:Who:Contact:LastName")
     ENDIF
 
+     /* Title */
     SET @Title = AttributeValue("Titel")
     IF EMPTY(@Title) THEN
         SET @title = AttributeValue("Title")
@@ -73,9 +74,9 @@
     IF (@Salutation == 'Divers') THEN
         IF NOT EMPTY (@FirstName) AND NOT EMPTY (@LastName) THEN
             IF NOT EMPTY (@Title) THEN
-                SET @fullSalutation = Concat("Liebe:r ", @Title, " ", @FirstNane, " ", @LastName)
+                SET @fullSalutation = Concat("Liebe:r ", @Title, " ", @FirstName, " ", @LastName)
             ELSE
-                SET @fullSalutation = Concat("Liebe:r ", @FirstNane, " ", @LastName)
+                SET @fullSalutation = Concat("Liebe:r ", @FirstName, " ", @LastName)
             ENDIF
         ELSE
             SET @fullSalutation = "Liebe:r Interessent:in"
