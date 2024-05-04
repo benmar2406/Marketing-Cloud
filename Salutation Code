@@ -3,7 +3,6 @@
 %%[
     VAR @FirstName, @LastName, @Salutation, @fullSalutation, @SubjectSalutation
 
-
     /* Try to obtain values from different possible column names */
     
     /* First name */
