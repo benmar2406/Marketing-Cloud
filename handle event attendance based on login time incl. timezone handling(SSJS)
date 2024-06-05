@@ -7,7 +7,7 @@ if(encodedEventLink) {
     var eventLink = decodeURIComponent(encodedEventLink);
   }
 var dstActiveString = Request.GetQueryStringParameter("isDst");
-var dstActive = dstActiveString === "true"; // dstActive wird zu true (boolesch), wenn der String "true" ist, sonst false.
+var dstActive = dstActiveString === "true"; 
 var eventStartDateTime = Request.GetQueryStringParameter("eventStartDateTime");  
 var eventStartCET = new Date(eventStartDateTime);
 var eventEndDateTime = Request.GetQueryStringParameter("eventEndDateTime");  
