@@ -1,0 +1,158 @@
+<!==
+
+%%[
+    /* Definiere die Variablen */
+    VAR @FirstName, @LastName, @Salutation, @Title, @fullSalutation
+    VAR @customAnredeMoin, @customAnredeGeehrte, @customAnredeLiebe, @customAnredeLiebeVorname
+
+    /* Vorname */
+    SET @FirstName = AttributeValue("Vorname")
+    IF EMPTY(@FirstName) THEN
+        SET @FirstName = AttributeValue("FirstName")
+    ENDIF
+    IF EMPTY(@FirstName) THEN
+        SET @FirstName = AttributeValue("Account:FirstName")
+    ENDIF
+    IF EMPTY(@FirstName) THEN
+        SET @FirstName = AttributeValue("Opportunity:Account:FirstName")
+    ENDIF
+
+    /* Nachname */
+    SET @LastName = AttributeValue("Nachname")
+    IF EMPTY(@LastName) THEN
+        SET @LastName = AttributeValue("LastName")
+    ENDIF
+    IF EMPTY(@LastName) THEN
+        SET @LastName = AttributeValue("Account:LastName")
+    ENDIF
+    IF EMPTY(@LastName) THEN
+        SET @LastName = AttributeValue("Opportunity:Account:LastName")
+    ENDIF
+
+    /* Anrede */
+    SET @Salutation = AttributeValue("Anrede")
+    IF EMPTY(@Salutation) THEN
+        SET @Salutation = AttributeValue("Salutation")
+    ENDIF
+    IF EMPTY(@Salutation) THEN
+        SET @Salutation = AttributeValue("Account:Salutation")
+    ENDIF
+    IF EMPTY(@Salutation) THEN
+        SET @Salutation = AttributeValue("Opportunity:Account:Salutation")
+    ENDIF
+
+    /* Titel */
+    SET @Title = AttributeValue("Titel")
+    IF EMPTY(@Title) THEN
+        SET @Title = AttributeValue("Title")
+    ENDIF
+    IF EMPTY(@Title) THEN
+        SET @Title = AttributeValue("Account:Title")
+    ENDIF
+    IF EMPTY(@Title) THEN
+        SET @Title = AttributeValue("Opportunity:Account:Title")
+    ENDIF
+
+    /* Generiere Anrede-Logiken */
+
+    /* customAnredeMoin */
+    IF @Salutation == 'Herr' THEN
+        IF NOT EMPTY(@LastName) THEN
+            SET @customAnredeMoin = Concat("Moin, lieber Herr ", @LastName)
+        ELSE
+            SET @customAnredeMoin = "Moin, lieber Interessent"
+        ENDIF
+    ELSEIF @Salutation == 'Frau' THEN
+        IF NOT EMPTY(@LastName) THEN
+            SET @customAnredeMoin = Concat("Moin, liebe Frau ", @LastName)
+        ELSE
+            SET @customAnredeMoin = "Moin, liebe Interessentin"
+        ENDIF
+    ELSEIF @Salutation == 'Divers' THEN
+        IF NOT EMPTY(@FirstName) THEN
+            SET @customAnredeMoin = Concat("Moin ", @FirstName)
+        ELSE
+            SET @customAnredeMoin = "Moin, liebe/r Interessent/in"
+        ENDIF
+    ELSE
+        SET @customAnredeMoin = "Moin, liebe/r Interessent/in"
+    ENDIF
+
+    /* customAnredeGeehrte */
+    IF @Salutation == 'Herr' THEN
+        IF NOT EMPTY(@LastName) THEN
+            SET @customAnredeGeehrte = Concat("Sehr geehrter Herr ", @LastName)
+        ELSE
+            SET @customAnredeGeehrte = "Sehr geehrter Interessent"
+        ENDIF
+    ELSEIF @Salutation == 'Frau' THEN
+        IF NOT EMPTY(@LastName) THEN
+            SET @customAnredeGeehrte = Concat("Sehr geehrte Frau ", @LastName)
+        ELSE
+            SET @customAnredeGeehrte = "Sehr geehrte Interessentin"
+        ENDIF
+    ELSEIF @Salutation == 'Divers' THEN
+        IF NOT EMPTY(@FirstName) THEN
+            SET @customAnredeGeehrte = Concat("Guten Tag ", @FirstName)
+        ELSE
+            SET @customAnredeGeehrte = "Liebe/r Interessent/in"
+        ENDIF
+    ELSE
+        SET @customAnredeGeehrte = "Liebe/r Interessent/in"
+    ENDIF
+
+    /* customAnredeLiebe */
+    IF @Salutation == 'Herr' THEN
+        IF NOT EMPTY(@LastName) THEN
+            SET @customAnredeLiebe = Concat("Lieber Herr ", @LastName)
+        ELSE
+            SET @customAnredeLiebe = "Lieber Interessent"
+        ENDIF
+    ELSEIF @Salutation == 'Frau' THEN
+        IF NOT EMPTY(@LastName) THEN
+            SET @customAnredeLiebe = Concat("Liebe Frau ", @LastName)
+        ELSE
+            SET @customAnredeLiebe = "Liebe Interessentin"
+        ENDIF
+    ELSEIF @Salutation == 'Divers' THEN
+        IF NOT EMPTY(@FirstName) THEN
+            SET @customAnredeLiebe = Concat("Guten Tag ", @FirstName)
+        ELSE
+            SET @customAnredeLiebe = "Liebe/r Interessent/in"
+        ENDIF
+    ELSE
+        SET @customAnredeLiebe = "Liebe/r Interessent/in"
+    ENDIF
+
+    /* customAnredeLiebeVorname */
+    IF @Salutation == 'Herr' THEN
+        IF NOT EMPTY(@FirstName) THEN
+            SET @customAnredeLiebeVorname = Concat("Lieber ", @FirstName)
+        ELSE
+            SET @customAnredeLiebeVorname = "Liebe/r Interessent/in"
+        ENDIF
+    ELSEIF @Salutation == 'Frau' THEN
+        IF NOT EMPTY(@FirstName) THEN
+            SET @customAnredeLiebeVorname = Concat("Liebe ", @FirstName)
+        ELSE
+            SET @customAnredeLiebeVorname = "Liebe/r Interessent/in"
+        ENDIF
+    ELSEIF @Salutation == 'Divers' THEN
+        IF NOT EMPTY(@FirstName) THEN
+            SET @customAnredeLiebeVorname = Concat("Guten Tag ", @FirstName)
+        ELSE
+            SET @customAnredeLiebeVorname = "Liebe/r Interessent/in"
+        ENDIF
+    ELSE
+        SET @customAnredeLiebeVorname = "Liebe/r Interessent/in"
+    ENDIF
+    
+    /* Generate Subjectline Salutation */
+    IF NOT EMPTY(@FirstName) AND NOT EMPTY(@LastName) THEN
+        SET @subjectSalutation = CONCAT(@FirstName, " ", @LastName)
+    ENDIF
+
+]%%
+
+==>
+
