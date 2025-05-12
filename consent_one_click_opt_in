@@ -1,0 +1,43 @@
+%%[
+
+    set @oneClickUnsubDE = lookuprows("One_Click_Opt_Outs", "update_consent", 1)
+    set @rowcountDE = rowcount(@oneClickUnsubDE)
+
+    if @rowcountDE > 0 then
+
+        for @i = 1 to @rowcountDE DO
+            set @consentToUpdate = row(@oneClickUnsubDE, @i)
+            set @contactId = field(@consentToUpdate, "SubscriberKey")
+
+            SET @consentRecords = RetrieveSalesforceObjects(
+                'DataConsent__c', 
+                'Id',
+                'Contact__c', '=', @contactId,
+                'Consentchannel__c', '=', 'Email'            )
+
+            SET @rc = RowCount(@consentRecords)
+            
+            IF @rc > 0 THEN  
+                SET @row = Row(@consentRecords, 1)
+                SET @consentId = Field(@row, 'Id')
+
+                SET @updateConsent = UpdateSingleSalesforceObject(
+                    'DataConsent__c', @consentId, 
+                    'Status__c', 'Optout'
+                )
+
+
+            ELSE  
+                SET @createConsent = CreateSalesforceObject(
+                    'DataConsent__c', 3, 
+                    'Contact__c', @contactId,
+                    'Consentchannel__c', 'Email',
+                    'Status__c', 'Optout',
+                )
+
+            ENDIF
+        NEXT
+
+    ENDIF
+
+]%%
