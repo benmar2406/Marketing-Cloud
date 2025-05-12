@@ -1,0 +1,45 @@
+
+%%[ 
+    VAR @email, @contactId, @email
+    SET @contactId = QueryParameter('contactid')
+    SET @email = QueryParameter('email')
+    SET @success = false 
+]%%
+
+
+<script runat="server">
+    Platform.Load("core", "1");
+    
+   try {
+        //retrieve logunsubevent script and execute
+        var logUnsubEvent = Platform.Function.ContentBlockByID("158255");
+        Write(TreatAsContent(logUnsubEvent));
+        //Update Consent record in Salescloud
+        var ampUpdateConsent = Platform.Function.ContentBlockByID("158258");
+        Write(TreatAsContent(ampUpdateConsent));
+     
+        //used for displaying feedback message to user
+        var success = true
+        Variable.SetValue("@success", success); 
+
+      
+   } catch (ex) {
+        var logDE = DataExtension.Init("LOG_Consent_EUFH");
+        var date = new Date();
+        var Id = Platform.Function.GUID();
+         var cid = Variable.GetValue("@ContactId");
+        logDE.Rows.Add({ LogID: Id, Level: "critical", Source: "Unsubscribe from CP", Error_Message: Platform.Function.Stringify(ex), ContactId: cid, CreatedAt: date });
+        
+       //used for displaying feedback message to user
+        var success = false
+        Variable.SetValue("@success", success); 
+    }
+</script>
+
+%%[
+    IF (@success == true) THEN 
+        SET @message = "Sie haben sich erfolgreich abgemeldet."
+    ELSE 
+        SET @message = "Da hat etwas nicht funktioniert. Bitte wenden Sie sich an unseren Service."
+    ENDIF
+ ]%%
