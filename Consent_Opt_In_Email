@@ -1,0 +1,41 @@
+
+<!==
+
+%%[
+
+   VAR @Salutation, @FirstName, @LastName, @contactId, @emailAddress, @confirmationUrl, @leadSource, @phone, @emailConsent, @zertiConsent, @customAnredeMoin
+
+    SET @FirstName = AttributeValue("Vorname")
+    SET @LastName = AttributeValue("Nachname")
+    SET @Salutation = AttributeValue("Anrede")
+    SET @emailAddress = AttributeValue("EmailAddress")
+    SET @phoneConsent = AttributeValue("Phone_Consent")
+    SET @emailConsent = AttributeValue("Email_Consent") 
+    SET @zertiConsent = AttributeValue("Zerti_Consent") 
+    SET @leadSource = AttributeValue("Lead_Source")
+    SET @contactId = AttributeValue("SubscriberKey")
+
+      /* Greeting line */
+    IF NOT EMPTY(@FirstName) AND (@Salutation == 'Herr' OR @Salutation == 'Frau' OR @Salutation == 'Divers' OR @Salutation == '') THEN
+        IF @Salutation == 'Herr' THEN
+        SET @customAnredeMoin = Concat("Moin, lieber ", @FirstName)
+        ELSEIF @Salutation == 'Frau' THEN
+        SET @customAnredeMoin = Concat("Moin, liebe ", @FirstName)
+        ELSE
+        SET @customAnredeMoin = Concat("Moin, ", @FirstName)
+        ENDIF
+    ELSE
+        SET @customAnredeMoin = "Moin"
+    ENDIF
+
+    SET @confirmationUrl = CloudPagesUrl(
+        1429, 
+        'contactid', @contactId, 
+        'emailaddress', @emailAddress, 
+        'leadsource', @leadSource, 
+        'phoneconsent', @phoneConsent, 
+        'emailconsent', @emailConsent,  /* This is now boolean */
+        'zerticonsent', @zertiConsent)
+]%%
+
+==>
