@@ -29,7 +29,7 @@
         ENDIF
     
     ELSE
-        /* If no contact data is available retrieve data from journey data extension. The offset needs to be calculated differently since times are displayed differently in SF Data Extensions und regular data extensions*/
+        /* If no contact data is available retrieve data from journey data extension. The offset needs to be calculated differently since times are displayed differently in SF Data Event Data Extensions and regular data extensions*/
         SET @isDst = AttributeValue("CampaignMember:Campaign:IsEventInDST__c")
         SET @debug = "Journeydata"
         SET @eventStartDateTime = AttributeValue("CampaignMember:Campaign:Event_Start_Datetime__c")
