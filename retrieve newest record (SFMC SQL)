@@ -1,0 +1,36 @@
+
+SELECT
+    a.AccountId,
+    a.ContactId,
+    b.Vertragsbeginn_am AS Letzter_Vertragsbeginn_am,
+    b.Vertragsende AS Letztes_Vertragsende_am,
+    b.Vertragsstatus,
+    b.Aktueller_Preis AS Kurspreis,
+    b.Kursnummer,
+    b.Rabattstufe AS Rabatt_aktueller_Vertrag,
+    b.Kuendigungsfrist,
+    b.Rabattgrund,
+    b.Vertragsname,
+    p.Produktname AS Letzter_gebuchter_Kurs,
+    p.Fachbereich AS Fachbereich_Vertrag
+
+FROM
+    [PersonAccounts] a
+JOIN
+    [Contracts] b ON a.AccountId = b.AccountId
+    
+JOIN
+    (SELECT 
+        AccountId, 
+        MAX(Vertragsbeginn_am) AS MaxStartDate
+    FROM 
+        [Contracts]
+    GROUP BY 
+        AccountId) 
+    LATEST ON b.AccountId = latest.AccountId AND b.Vertragsbeginn_am = latest.MaxStartDate
+
+LEFT JOIN 
+    [Product] p ON b.Kurs = p.productId
+    
+WHERE
+    b.Vertragsbeginn_am IS NOT NULL
