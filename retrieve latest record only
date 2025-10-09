@@ -1,0 +1,29 @@
+SELECT
+    a.AccountId,
+    a.ContactId,
+    r.Vertragsbeginn_am AS Letzter_Vertragsbeginn_am,
+    r.Vertragsende      AS Letztes_Vertragsende_am,
+    r.Vertragsstatus,
+    r.Aktueller_Preis   AS Kurspreis,
+    r.Kursnummer,
+    r.Rabattstufe       AS Rabatt_aktueller_Vertrag,
+    r.Kuendigungsfrist,
+    r.Rabattgrund,
+    r.Vertragsname,
+    p.Produktname       AS Letzter_gebuchter_Kurs,
+    p.Fachbereich       AS Fachbereich_Vertrag
+FROM [PersonAccounts] a
+JOIN (
+    SELECT
+        b.*,
+        ROW_NUMBER() OVER (
+            PARTITION BY b.AccountId
+            ORDER BY b.Vertragsbeginn_am DESC
+        ) AS rn
+    FROM [Contracts] b
+    WHERE b.Vertragsbeginn_am IS NOT NULL
+) r
+  ON r.AccountId = a.AccountId
+ AND r.rn = 1
+LEFT JOIN [Product] p
+  ON r.Kurs = p.productId
