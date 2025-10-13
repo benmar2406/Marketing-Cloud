@@ -1,32 +1,8 @@
 %%[ 
     VAR @email, @contactId, @success, @leadSource, @phone, @emailAddress, @zerti
     SET @contactId = QueryParameter('contactid')
-    SET @phoneConsentParam = QueryParameter("phoneconsent")
-    SET @emailConsentParam = QueryParameter("emailconsent") 
-    SET @zertiConsentParam = QueryParameter("zerticonsent")
     SET @emailAddress = QueryParameter("emailaddress")
-
-    IF Lowercase(@emailConsentParam) == "true" THEN
-        SET @emailConsent = true
-    ELSE
-     SET @emailConsent = false
-    ENDIF
-
-    IF Lowercase(@zertiConsentParam) == "true" THEN
-        SET @zertiConsent = true
-    ELSE
-        SET @zertiConsent = false
-    ENDIF
-
-    IF Lowercase(@phoneConsentParam) == "true" THEN
-        SET @phoneConsent = true
-    ELSE
-        SET @phoneConsent = false
-    ENDIF
-
-
-    SET @leadSource =  QueryParameter('leadsource')
-
+    SET @leadSource = QueryParameter("leadsource")
 ]%%
 
 <script runat="server">
@@ -35,15 +11,15 @@
     var cid = Variable.GetValue("@contactId");
     var emailAddress = Variable.GetValue("@emailAddress");
     var leadSource = Variable.GetValue("@leadSource");
-
+    
     try {
         //Update consent record in Sales Cloud
-        var ampScriptUpdateSalesCloud = Platform.Function.ContentBlockByID("158252");
+        var ampScriptUpdateSalesCloud = Platform.Function.ContentBlockByID("170332");
         Write(TreatAsContent(ampScriptUpdateSalesCloud));
 
 
         //Update existing subscriber on Subscriber List to active in case he exists and has unsubscribed in the past
-
+    
         var person = {
             EmailAddress: emailAddress,
             SubscriberKey: cid
@@ -58,12 +34,11 @@
         };
 
         var resp = prox.updateItem("Subscriber", sub); 
-
-        if (emailAddress && emailAddress != '') {
-            logTransaction('successful', 'none', cid, emailAddress, leadSource)
-        } else {
-            logTransaction('error', 'no email address', cid, emailAddress, leadSource)
-        }
+      
+      
+        //log success 
+      
+        logTransaction('successful', 'none', cid, emailAddress, leadSource)
 
         //used for displaying feedback message to user
         var success = true
@@ -79,27 +54,28 @@
         //used for displaying feedback message to user
         var success = false
         Variable.SetValue("@success", success);
-
     }
 
 
     // logging function
     function logTransaction(level, errorMessage, cid, emailAddress, leadSource) {
-        var logDE = DataExtension.Init("LOG_Consent_EUFH");
+        var logDE = DataExtension.Init("LOG_Consent_ILS");
         var date = new Date();
         var Id = Platform.Function.GUID();
-        logDE.Rows.Add({ LogID: Id, Level: level, Source: "DOI Confirm CP", Error_Message: errorMessage, ContactId: cid, CreatedAt: date, Email: emailAddress, Lead_Source: leadSource  });
+        logDE.Rows.Add({ LogID: Id, Level: level, Source: "DOI Confirm CP", Error_Message: Stringify(errorMessage), ContactId: cid, Created_At: date, Email: emailAddress, Lead_Source: leadSource  });
     }
-
 
 </script>
 
+
 %%[
+    VAR @message
+
     IF (@success == true) THEN 
-        SET @message1 = "Ihre Bestätigung war erfolgreich!"
-        SET @message2 = "Wir kontaktieren Sie in Kürze."
+       SET @message = ContentBlockbyId(170360)
     ELSE 
-        SET @message1 = "Da hat etwas nicht funktioniert."
-        SET @message2 = "Bitte wenden Sie sich an unseren Service."
+        SET @message = ContentBlockbyId(170352)
     ENDIF
 ]%%
+
+
