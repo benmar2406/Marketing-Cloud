@@ -1,0 +1,7 @@
+SELECT 
+    SubscriberKey
+FROM
+    ENT._BusinessUnitUnsubscribes
+WHERE
+    UnsubReason = 'Unsubscribed from the Subscription Center'
+    AND BusinessUnitID = {Business Unit MID}
