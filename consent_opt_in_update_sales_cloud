@@ -1,43 +1,37 @@
 %%[
+  
+      VAR @consentId, @consentRecords, @rc, @row, @updateConsent, @createConsent, @debug, @contactId
 
-    set @oneClickUnsubDE = lookuprows("One_Click_Opt_Outs", "update_consent", 1)
-    set @rowcountDE = rowcount(@oneClickUnsubDE)
+      SET @contactId = QueryParameter("contactid")
 
-    if @rowcountDE > 0 then
+      SET @consentRecords = RetrieveSalesforceObjects(
+            'DataConsent__c', 
+            'Id',
+            'Contact__c', '=', @contactId,
+            'Consentchannel__c', '=', 'Email',
+            'Institute__c', '=', 'ILS'
+            )
 
-        for @i = 1 to @rowcountDE DO
-            set @consentToUpdate = row(@oneClickUnsubDE, @i)
-            set @contactId = field(@consentToUpdate, "SubscriberKey")
+      SET @rc = RowCount(@consentRecords)
 
-            SET @consentRecords = RetrieveSalesforceObjects(
-                'DataConsent__c', 
-                'Id',
-                'Contact__c', '=', @contactId,
-                'Consentchannel__c', '=', 'Email'            )
+      IF @rc > 0 THEN  
+            SET @row = Row(@consentRecords, 1)
+            SET @consentId = Field(@row, 'Id')
 
-            SET @rc = RowCount(@consentRecords)
+            SET @updateConsent = UpdateSingleSalesforceObject(
+                  'DataConsent__c', @consentId, 
+                  'Status__c', 'DOI'
+            )
+
             
-            IF @rc > 0 THEN  
-                SET @row = Row(@consentRecords, 1)
-                SET @consentId = Field(@row, 'Id')
-
-                SET @updateConsent = UpdateSingleSalesforceObject(
-                    'DataConsent__c', @consentId, 
-                    'Status__c', 'Optout'
-                )
-
-
-            ELSE  
-                SET @createConsent = CreateSalesforceObject(
-                    'DataConsent__c', 3, 
-                    'Contact__c', @contactId,
-                    'Consentchannel__c', 'Email',
-                    'Status__c', 'Optout',
-                )
-
-            ENDIF
-        NEXT
-
-    ENDIF
+      ELSE
+            SET @createConsent = CreateSalesforceObject(
+                  'DataConsent__c', 4, 
+                  'Contact__c', @contactId,
+                  'Consentchannel__c', 'Email',
+                  'Institute__c', 'ILS',
+                  'Status__c', 'DOI'
+                  )
+      ENDIF
 
 ]%%
