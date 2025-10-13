@@ -1,16 +1,11 @@
-%%[ 
-    VAR @email, @contactId, @success, @leadSource, @phone, @emailAddress, @zerti
-    SET @contactId = QueryParameter('contactid')
-    SET @emailAddress = QueryParameter("emailaddress")
-    SET @leadSource = QueryParameter("leadsource")
-]%%
+
 
 <script runat="server">
     Platform.Load("core", "1");
 
-    var cid = Variable.GetValue("@contactId");
-    var emailAddress = Variable.GetValue("@emailAddress");
-    var leadSource = Variable.GetValue("@leadSource");
+    var cid = Request.GetQueryStringParameter("contactid");
+    var emailAddress = Request.GetQueryStringParameter("emailaddress");
+    var leadSource = Request.GetQueryStringParameter("leadsource");
     
     try {
         //Update consent record in Sales Cloud
@@ -54,6 +49,7 @@
         //used for displaying feedback message to user
         var success = false
         Variable.SetValue("@success", success);
+
     }
 
 
@@ -64,6 +60,7 @@
         var Id = Platform.Function.GUID();
         logDE.Rows.Add({ LogID: Id, Level: level, Source: "DOI Confirm CP", Error_Message: Stringify(errorMessage), ContactId: cid, Created_At: date, Email: emailAddress, Lead_Source: leadSource  });
     }
+
 
 </script>
 
