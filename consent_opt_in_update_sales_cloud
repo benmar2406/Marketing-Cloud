@@ -9,7 +9,7 @@
             'Id',
             'Contact__c', '=', @contactId,
             'Consentchannel__c', '=', 'Email',
-            'Institute__c', '=', 'ILS'
+            'Institute__c', '=', {Brand}
             )
 
       SET @rc = RowCount(@consentRecords)
@@ -29,7 +29,7 @@
                   'DataConsent__c', 4, 
                   'Contact__c', @contactId,
                   'Consentchannel__c', 'Email',
-                  'Institute__c', 'ILS',
+                  'Institute__c', {Brand},
                   'Status__c', 'DOI'
                   )
       ENDIF
