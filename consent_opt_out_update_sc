@@ -1,12 +1,14 @@
-<table cellpadding="0" cellspacing="0" width="100%" role="presentation" style="min-width: 100%; " class="stylingblock-content-wrapper"><tr><td class="stylingblock-content-wrapper camarker-inner">%%[
+%%[
   VAR @consentId, @consentRecords, @rc, @row, @updateConsent, @createConsent
 
+  SET @contactId = "123456"
 
   SET @consentRecords = RetrieveSalesforceObjects(
      'DataConsent__c', 
      'Id',
      'Contact__c', '=', @contactId,
-     'Consentchannel__c', '=', 'Email'
+     'Consentchannel__c', '=', 'Email',
+     'Institute__c', '=', {Brand}
      )
 
   SET @rc = RowCount(@consentRecords)
@@ -23,10 +25,11 @@
         
   ELSE  
     SET @createConsent = CreateSalesforceObject(
-        'DataConsent__c', 3, 
+        'DataConsent__c', 4, 
         'Contact__c', @contactId,
         'Consentchannel__c', 'Email',
-        'Status__c', 'Optout'
+        'Status__c', 'Optout',
+        'Institute__c', {Brand}
         )
   ENDIF
-]%%</td></tr></table>
+]%%
