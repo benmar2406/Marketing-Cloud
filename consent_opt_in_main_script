@@ -42,9 +42,12 @@
 
     } catch (ex) {
 
-        Platform.Function.Stringify(ex)
+        var errorText = (ex && (error.message || ex.description))
+        ? (ex.message || ex.description)
+        : String(error);
 
-        logTransaction('failed', ex, cid, emailAddress, leadSource)
+
+        logTransaction('failed', ex.description, cid, emailAddress, leadSource)
 
         //used for displaying feedback message to user
         var success = false
@@ -58,7 +61,15 @@
         var logDE = DataExtension.Init("LOG_Consent_ILS");
         var date = new Date();
         var Id = Platform.Function.GUID();
-        logDE.Rows.Add({ LogID: Id, Level: level, Source: "DOI Confirm CP", Error_Message: Stringify(errorMessage), ContactId: cid, Created_At: date, Email: emailAddress, Lead_Source: leadSource  });
+      
+        logDE.Rows.Add({ 
+          LogID: Id, Level: level, 
+          Source: "DOI Confirm CP", 
+          Error_Message: String(errorMessage), 
+          ContactId: cid, Created_At: 
+          date, Email: emailAddress, 
+          Lead_Source: leadSource  
+        });
     }
 
 
