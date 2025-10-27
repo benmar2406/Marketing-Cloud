@@ -19,7 +19,7 @@
         Write(TreatAsContent(ampUpdateConsent));
      
         //used for displaying feedback message to user
-        var success = true
+        var success = true;
         Variable.SetValue("@success", success); 
 
       
@@ -43,7 +43,7 @@
         });
         
        //used for displaying feedback message to user
-        var success = false
+        var success = false;
         Variable.SetValue("@success", success); 
     }
     }
