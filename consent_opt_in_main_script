@@ -42,27 +42,15 @@
 
     } catch (ex) {
 
-        var errorText = (ex && (ex.description || ex.message))
+         var errorText = (ex && (ex.description || ex.message))
             ? (ex.description || ex.message)
             : String(error);
 
-        var logDE = DataExtension.Init("LOG_Consent_EUFH");
-        var date = new Date();
-        var Id = Platform.Function.GUID();
-        var cid = Variable.GetValue("@ContactId");
-        
-        logDE.Rows.Add({ 
-          LogID: Id, 
-          Level: "critical", 
-          Source: "Unsubscribe from CP", 
-          Error_Message: String(errorText), 
-          ContactId: cid, 
-          Created_At: date 
-        });
-        
-       //used for displaying feedback message to user
+        logTransaction('failed', errorText, cid, emailAddress, leadSource)
+
+        //used for displaying feedback message to user
         var success = false
-        Variable.SetValue("@success", success); 
+        Variable.SetValue("@success", success);
 
     }
 
