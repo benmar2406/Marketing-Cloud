@@ -1,0 +1,256 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/png" href="" />
+  <title>Titel hinzufügen/title>
+
+  <!-- Webfont -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --fg: #3e3e3e;
+      --brand: #268b2e;
+      --bg: #ffffff;
+      --bg-muted: #ebebeb;
+      --maxw: 900px;
+      --pad: 16px;
+      --radius: 12px;
+    }
+
+    /* Page layout */
+    html, body {
+      height: 100%;
+    }
+    body {
+      margin: 0;
+      font-family: "Open Sans", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--fg);
+      background: var(--bg);
+    }
+
+    .page {
+      min-height: 100vh;                 
+      display: flex;                    
+      flex-direction: column;
+    }
+
+    header {
+      border-bottom: 1px solid #e3e3e3;
+      background: #fff;
+    }
+    .wrap {
+      max-width: var(--maxw);
+      margin-inline: auto;
+      padding: 12px var(--pad);
+    }
+
+    /* Header content */
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand img {
+      height: 56px;
+      width: auto;
+      display: block;
+    }
+
+    /* Main (middle) block */
+    main.middle {
+      flex: 1;                            
+      display: flex;                      
+      align-items: center;
+      justify-content: center;
+      padding: clamp(16px, 4vw, 40px);
+    }
+    .card {
+      width: min(900px, 100%);
+      border: 1px solid #e7e7e7;
+      border-radius: var(--radius);
+      padding: clamp(16px, 3vw, 32px);
+      box-shadow: 0 6px 24px rgba(0,0,0,.04);
+      background: #fff;
+    }
+    .card h1 {
+      margin: 0 0 12px;
+      font-size: clamp(20px, 3.2vw, 28px);
+      line-height: 1.2;
+    }
+    .message {
+      font-size: clamp(14px, 1.8vw, 16px);
+      line-height: 1.6;
+      margin: 6px 0 24px;
+      word-wrap: break-word;
+    }
+
+    /* Signature row (photo + text) */
+    .signature {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      justify-content: left;            /* <- zentriert gesamtes Modul */
+      text-align: left;
+      flex-wrap: wrap;
+    }
+    .signature .avatar {
+      flex: 0 0 auto;
+      width: 74px;
+      height: 74px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 1px solid #eee;
+    }
+    .signature .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .signature .who {
+      min-width: 220px;
+    }
+    .who .name {
+      font-weight: 700;
+    }
+    .who .role {
+      opacity: .85;
+      font-size: 14px;
+    }
+
+    /* Footer always at bottom thanks to column flex on .page */
+    footer {
+      background: var(--bg-muted);
+      color: var(--fg);
+      padding-top: 24px;
+      padding-bottom: 24px;
+      border-top: 1px solid #ddd;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr 0.8fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .footer-box img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+    .footer-title {
+      font-weight: 700;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+    .footer-small {
+      font-size: 10px;
+      line-height: 1.4;
+      opacity: .9;
+    }
+    .contact-list {
+      border-top: 1px solid #e3e3e3;
+      margin-top: 8px;
+      padding-top: 8px;
+      font-size: 13px;
+    }
+    .contact-list a {
+      color: var(--brand);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .legal-links a {
+      color: var(--brand);
+      text-decoration: none;
+      font-weight: 700;
+      display: inline-block;
+      margin: 4px 0;
+    }
+
+    .footnote {
+      margin-top: 28px;
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+      .header-row {
+        justify-content: center;
+      }
+      .signature { text-align: center; }
+      .who { text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+          <!-- a droppable slot for Content Builder -->
+<div data-type="slot"
+     data-key="referencecontent"
+     data-label="Reference Content"
+     data-max-blocks="1"
+     >
+</div>
+    <!-- Header -->
+    <header>
+      <div class="wrap">
+        <div class="header-row">
+          <a class="brand" href="" target="_blank" rel="noopener">
+            <img src="" alt="">
+          </a>
+        </div>
+      </div>
+
+
+    </header>
+
+    <!-- Middle (flex:1) -->
+    <main class="middle" role="main" aria-label="Nachricht und Signatur">
+      <article class="card">
+        <!-- Dynamische Nachricht -->
+        <div class="message">
+          %%=v(@message)=%%
+        </div>
+
+        <!-- Foto + Signatur-->
+        <div class="signature">
+          <div class="avatar" aria-hidden="true">
+            <img src="">
+          </div>
+          <div class="who">
+            <div>Herzliche Grüße</div>
+            <div class="name">Text1</div>
+            <div class="role">Text2</div>
+          </div>
+        </div>
+      </article>
+    </main>
+
+    <!-- Footer -->
+    <footer role="contentinfo">
+      <div class="wrap">
+
+
+        
+      </div>
+    </footer>
+
+  </div>
+</body>
+</html>
